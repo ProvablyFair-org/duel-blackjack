@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DUEL BLACKJACK — 10M SIMULATED HANDS</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 24px; }
+  .container { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 32px; }
+  h1 { text-align: center; font-size: 16px; font-weight: 600; color: #333; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .chart-wrap { position: relative; height: 420px; margin-bottom: 24px; }
+  .box { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin: 16px auto; max-width: 900px; text-align: center; }
+</style>
+</head><body>
+<div class="container">
+<h1>DUEL BLACKJACK — RTP CONVERGENCE</h1>
+<p style="text-align:center;font-size:12px;color:#999;margin-bottom:16px">10 streams x 1M = 10M hands | Fisher's method | S17 + DAS basic strategy</p>
+<div class="chart-wrap"><canvas id="chart"></canvas></div>
+<div class="box">
+  Simulated RTP: <strong>99.4670%</strong> | Optimal-play RTP (engine): <strong>99.4296%</strong> | Fisher's p: <strong>0.686432</strong> (T=16.48, df=20) | Serial fails: 0
+</div>
+</div>
+<script>
+new Chart(document.getElementById('chart'),{type:'line',data:{
+labels:["1K","5K","10K","50K","100K","500K","1M"],
+datasets:[{label:'Cumulative simulated RTP',data:[98.235,98.912,99.3665,99.72290000000001,99.43230000000001,99.42574,99.466985],borderColor:'#1565c0',tension:0.3,pointRadius:4},
+{label:'Optimal-play RTP (engine, 99.43%)',data:[99.42961198772629,99.42961198772629,99.42961198772629,99.42961198772629,99.42961198772629,99.42961198772629,99.42961198772629],borderColor:'#e57373',borderDash:[5,5],pointRadius:0}]},
+options:{responsive:true,maintainAspectRatio:false,
+scales:{y:{ticks:{color:'#666',callback:v=>v+'%'},grid:{color:'#e0e0e0'}},x:{ticks:{color:'#666'},grid:{color:'#e0e0e0'}}},
+plugins:{legend:{labels:{color:'#333'}}}}});
+</script></div></body></html>

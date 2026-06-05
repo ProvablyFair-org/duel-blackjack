@@ -1,0 +1,964 @@
+{
+  "generatedAt": "2026-06-05T03:27:39.994Z",
+  "rules": {
+    "soft17": "stand",
+    "doubleAfterSplit": true,
+    "surrender": false,
+    "reSplit": false,
+    "deck": "infinite"
+  },
+  "optimalPlay": {
+    "rtp": 0.994296119877263,
+    "edge": 0.005703880122737037,
+    "playerBJFreq": 0.04733727810650888,
+    "dealerBJFreq": 0.04733727810650888,
+    "source": "src/optimal-play.ts (independent recursive infinite-deck EV solver)",
+    "wooReference": 0.994296,
+    "wooDelta": 1.1987726300510815e-7
+  },
+  "pass1": {
+    "totalRounds": 10000000,
+    "streams": 10,
+    "roundsPerStream": 1000000,
+    "streamResults": [
+      {
+        "stream": 0,
+        "rtp": 0.9944015,
+        "outcomes": {
+          "win": 388838,
+          "lose": 320830,
+          "push": 86383,
+          "blackjack": 45157,
+          "bust": 158792
+        },
+        "seRTP": 0.0011452393716472413,
+        "lag1R": -0.00044991298651024156,
+        "lag1Z": -0.4499129865102416,
+        "runsZ": -0.4698781165686856,
+        "runsP": 0.6384420618757378
+      },
+      {
+        "stream": 1,
+        "rtp": 0.995114,
+        "outcomes": {
+          "win": 388873,
+          "lose": 320453,
+          "push": 87065,
+          "blackjack": 45102,
+          "bust": 158507
+        },
+        "seRTP": 0.001144991675956615,
+        "lag1R": 0.0001061261442343708,
+        "lag1Z": 0.1061261442343708,
+        "runsZ": -1.0295314422090118,
+        "runsP": 0.3032300289718264
+      },
+      {
+        "stream": 2,
+        "rtp": 0.9928245,
+        "outcomes": {
+          "win": 388012,
+          "lose": 320161,
+          "push": 87033,
+          "blackjack": 45043,
+          "bust": 159751
+        },
+        "seRTP": 0.0011447552457465842,
+        "lag1R": 0.00003338893506498067,
+        "lag1Z": 0.033388935064980675,
+        "runsZ": 0.10497025753200506,
+        "runsP": 0.9163993592642434
+      },
+      {
+        "stream": 3,
+        "rtp": 0.994911,
+        "outcomes": {
+          "win": 389095,
+          "lose": 319831,
+          "push": 86414,
+          "blackjack": 44904,
+          "bust": 159756
+        },
+        "seRTP": 0.0011449237585662256,
+        "lag1R": -0.001952481121437938,
+        "lag1Z": -1.952481121437938,
+        "runsZ": 0.5943627789536539,
+        "runsP": 0.552269451208236
+      },
+      {
+        "stream": 4,
+        "rtp": 0.9947275,
+        "outcomes": {
+          "win": 388794,
+          "lose": 320779,
+          "push": 86366,
+          "blackjack": 45129,
+          "bust": 158932
+        },
+        "seRTP": 0.001144980245123693,
+        "lag1R": 0.0004889182278956176,
+        "lag1Z": 0.4889182278956176,
+        "runsZ": 0.0025070402583907392,
+        "runsP": 0.9979996911922253
+      },
+      {
+        "stream": 5,
+        "rtp": 0.9938795,
+        "outcomes": {
+          "win": 388323,
+          "lose": 320191,
+          "push": 86633,
+          "blackjack": 45321,
+          "bust": 159532
+        },
+        "seRTP": 0.0011459546686897579,
+        "lag1R": 0.0016273299141373924,
+        "lag1Z": 1.6273299141373923,
+        "runsZ": -1.31417731685332,
+        "runsP": 0.18878655033791958
+      },
+      {
+        "stream": 6,
+        "rtp": 0.995873,
+        "outcomes": {
+          "win": 389266,
+          "lose": 320247,
+          "push": 86801,
+          "blackjack": 45236,
+          "bust": 158450
+        },
+        "seRTP": 0.0011450398591259952,
+        "lag1R": -0.00006962806639575468,
+        "lag1Z": -0.06962806639575468,
+        "runsZ": 0.5178333440519045,
+        "runsP": 0.6045745058311442
+      },
+      {
+        "stream": 7,
+        "rtp": 0.9963035,
+        "outcomes": {
+          "win": 389185,
+          "lose": 319946,
+          "push": 86368,
+          "blackjack": 45325,
+          "bust": 159176
+        },
+        "seRTP": 0.0011457577835863252,
+        "lag1R": 0.00004461958245358744,
+        "lag1Z": 0.044619582453587436,
+        "runsZ": -0.8033204808071932,
+        "runsP": 0.42178951253288144
+      },
+      {
+        "stream": 8,
+        "rtp": 0.994524,
+        "outcomes": {
+          "win": 388950,
+          "lose": 320332,
+          "push": 86719,
+          "blackjack": 44952,
+          "bust": 159047
+        },
+        "seRTP": 0.0011447782859319632,
+        "lag1R": 0.0003052376818887794,
+        "lag1Z": 0.3052376818887794,
+        "runsZ": 0.293948496851659,
+        "runsP": 0.7687972858068259
+      },
+      {
+        "stream": 9,
+        "rtp": 0.99414,
+        "outcomes": {
+          "win": 388403,
+          "lose": 320585,
+          "push": 86385,
+          "blackjack": 45298,
+          "bust": 159329
+        },
+        "seRTP": 0.0011451351325212546,
+        "lag1R": -0.0007607446104950314,
+        "lag1Z": -0.7607446104950314,
+        "runsZ": 0.4221477478605781,
+        "runsP": 0.6729171541870866
+      }
+    ],
+    "fisherCombined": {
+      "statistic": 16.48004946261718,
+      "df": 20,
+      "pValue": 0.6864319329135984,
+      "method": "per-stream z-test of streamRTP against analytical optimal-play RTP, Fisher-combined",
+      "analyticalReference": 0.994296119877263
+    },
+    "simulatedRTP": 0.99466985,
+    "serialIndependenceFails": 0,
+    "streamsFlaggedSerial": 0,
+    "bonferroni": {
+      "alphaFamily": 0.01,
+      "alphaPerStream": 0.001,
+      "zCriticalTwoSided": 3.2905267507092577
+    },
+    "lag1Autocorrelation": 0.0018420362974442997,
+    "runsTest": {
+      "z": -1.1635433189173208,
+      "pValue": 0.24460914995839267
+    },
+    "convergence": [
+      {
+        "rounds": 1000,
+        "rtp": 0.9823500000000001
+      },
+      {
+        "rounds": 5000,
+        "rtp": 0.98912
+      },
+      {
+        "rounds": 10000,
+        "rtp": 0.993665
+      },
+      {
+        "rounds": 50000,
+        "rtp": 0.9972290000000001
+      },
+      {
+        "rounds": 100000,
+        "rtp": 0.9943230000000002
+      },
+      {
+        "rounds": 500000,
+        "rtp": 0.9942574000000001
+      },
+      {
+        "rounds": 1000000,
+        "rtp": 0.99466985
+      }
+    ]
+  },
+  "pass2": {
+    "totalSeeds": 120,
+    "noncesPerSeed": 10000,
+    "flaggedSeeds": 11,
+    "cherryPickBinomial": 0.03844995945132886,
+    "perSeed": [
+      {
+        "hash": "94c218c91df8997d",
+        "earlyAvgReturn": 1.12,
+        "extendedAvgReturn": 1.1265326633165829,
+        "flagged": false
+      },
+      {
+        "hash": "2767434526770433",
+        "earlyAvgReturn": 0.93,
+        "extendedAvgReturn": 1.130854271356784,
+        "flagged": false
+      },
+      {
+        "hash": "11f33fa8d3f0408d",
+        "earlyAvgReturn": 1.02,
+        "extendedAvgReturn": 1.130251256281407,
+        "flagged": false
+      },
+      {
+        "hash": "0c49d3f098609342",
+        "earlyAvgReturn": 1.1,
+        "extendedAvgReturn": 1.136180904522613,
+        "flagged": false
+      },
+      {
+        "hash": "1ab532b55d8869b7",
+        "earlyAvgReturn": 0.95,
+        "extendedAvgReturn": 1.1421608040201006,
+        "flagged": false
+      },
+      {
+        "hash": "5a171081ba5a9893",
+        "earlyAvgReturn": 1.04,
+        "extendedAvgReturn": 1.1440201005025126,
+        "flagged": false
+      },
+      {
+        "hash": "d1ec528647780f2f",
+        "earlyAvgReturn": 1.12,
+        "extendedAvgReturn": 1.1101507537688442,
+        "flagged": false
+      },
+      {
+        "hash": "247a883ec66b8a85",
+        "earlyAvgReturn": 1.07,
+        "extendedAvgReturn": 1.1467839195979899,
+        "flagged": false
+      },
+      {
+        "hash": "697e7f4e78039b9f",
+        "earlyAvgReturn": 1.22,
+        "extendedAvgReturn": 1.1049246231155778,
+        "flagged": false
+      },
+      {
+        "hash": "6c021485301084e3",
+        "earlyAvgReturn": 1.32,
+        "extendedAvgReturn": 1.1232160804020102,
+        "flagged": false
+      },
+      {
+        "hash": "5b1a5f07fb1a9632",
+        "earlyAvgReturn": 1.25,
+        "extendedAvgReturn": 1.1248241206030152,
+        "flagged": false
+      },
+      {
+        "hash": "5c35a5de08fdc7b7",
+        "earlyAvgReturn": 0.96,
+        "extendedAvgReturn": 1.1076884422110553,
+        "flagged": false
+      },
+      {
+        "hash": "13f0d33ab47deaf5",
+        "earlyAvgReturn": 1.06,
+        "extendedAvgReturn": 1.1458291457286431,
+        "flagged": false
+      },
+      {
+        "hash": "4874966498e9ba88",
+        "earlyAvgReturn": 1.33,
+        "extendedAvgReturn": 1.1425628140703517,
+        "flagged": false
+      },
+      {
+        "hash": "559a543a04baa9bc",
+        "earlyAvgReturn": 0.75,
+        "extendedAvgReturn": 1.1346231155778894,
+        "flagged": true
+      },
+      {
+        "hash": "63ed21c5ba207596",
+        "earlyAvgReturn": 0.92,
+        "extendedAvgReturn": 1.1232160804020102,
+        "flagged": false
+      },
+      {
+        "hash": "8f721fd1c239d31a",
+        "earlyAvgReturn": 1.02,
+        "extendedAvgReturn": 1.1439698492462311,
+        "flagged": false
+      },
+      {
+        "hash": "b0999fa0e8e6daba",
+        "earlyAvgReturn": 1.13,
+        "extendedAvgReturn": 1.1032663316582914,
+        "flagged": false
+      },
+      {
+        "hash": "f65f69b085d856e4",
+        "earlyAvgReturn": 1.33,
+        "extendedAvgReturn": 1.1457286432160805,
+        "flagged": false
+      },
+      {
+        "hash": "30d03dedc5bfce99",
+        "earlyAvgReturn": 1.52,
+        "extendedAvgReturn": 1.1232663316582914,
+        "flagged": true
+      },
+      {
+        "hash": "38acb065e36d5815",
+        "earlyAvgReturn": 1.14,
+        "extendedAvgReturn": 1.1043718592964824,
+        "flagged": false
+      },
+      {
+        "hash": "7f04258a39883bf2",
+        "earlyAvgReturn": 1.25,
+        "extendedAvgReturn": 1.1268341708542713,
+        "flagged": false
+      },
+      {
+        "hash": "ebd7d3afcd26190f",
+        "earlyAvgReturn": 1.09,
+        "extendedAvgReturn": 1.1450753768844222,
+        "flagged": false
+      },
+      {
+        "hash": "049f0db011da89a1",
+        "earlyAvgReturn": 1.31,
+        "extendedAvgReturn": 1.1057788944723619,
+        "flagged": false
+      },
+      {
+        "hash": "b6fde37271285650",
+        "earlyAvgReturn": 1.22,
+        "extendedAvgReturn": 1.1284422110552763,
+        "flagged": false
+      },
+      {
+        "hash": "0582dec48fd83148",
+        "earlyAvgReturn": 1.17,
+        "extendedAvgReturn": 1.1146733668341708,
+        "flagged": false
+      },
+      {
+        "hash": "87d70894f2e700d4",
+        "earlyAvgReturn": 1.26,
+        "extendedAvgReturn": 1.1406532663316582,
+        "flagged": false
+      },
+      {
+        "hash": "c62b4e74ed2fa487",
+        "earlyAvgReturn": 1.04,
+        "extendedAvgReturn": 1.1245226130653265,
+        "flagged": false
+      },
+      {
+        "hash": "efcba710688cf50c",
+        "earlyAvgReturn": 1.2,
+        "extendedAvgReturn": 1.1365326633165829,
+        "flagged": false
+      },
+      {
+        "hash": "2e87797facbc1c8a",
+        "earlyAvgReturn": 0.99,
+        "extendedAvgReturn": 1.0985427135678392,
+        "flagged": false
+      },
+      {
+        "hash": "0ee43d20a4a93d11",
+        "earlyAvgReturn": 1.04,
+        "extendedAvgReturn": 1.107788944723618,
+        "flagged": false
+      },
+      {
+        "hash": "6e1e1bd29d650bde",
+        "earlyAvgReturn": 1.29,
+        "extendedAvgReturn": 1.1452763819095477,
+        "flagged": false
+      },
+      {
+        "hash": "725e9696b40b167e",
+        "earlyAvgReturn": 1.25,
+        "extendedAvgReturn": 1.1215075376884422,
+        "flagged": false
+      },
+      {
+        "hash": "8adb577704dae4b5",
+        "earlyAvgReturn": 1.55,
+        "extendedAvgReturn": 1.122964824120603,
+        "flagged": true
+      },
+      {
+        "hash": "3c56fc341864b3cc",
+        "earlyAvgReturn": 1.06,
+        "extendedAvgReturn": 1.1247738693467337,
+        "flagged": false
+      },
+      {
+        "hash": "cc34529ab4d5a36a",
+        "earlyAvgReturn": 1.09,
+        "extendedAvgReturn": 1.1065829145728643,
+        "flagged": false
+      },
+      {
+        "hash": "df7e9d03066c569e",
+        "earlyAvgReturn": 1.05,
+        "extendedAvgReturn": 1.1455276381909547,
+        "flagged": false
+      },
+      {
+        "hash": "2a0c539b1a5030d1",
+        "earlyAvgReturn": 1.04,
+        "extendedAvgReturn": 1.0932160804020101,
+        "flagged": false
+      },
+      {
+        "hash": "2b141c2f5c54f496",
+        "earlyAvgReturn": 1.17,
+        "extendedAvgReturn": 1.1184924623115577,
+        "flagged": false
+      },
+      {
+        "hash": "3cd3ca77b6399d6f",
+        "earlyAvgReturn": 1.11,
+        "extendedAvgReturn": 1.120854271356784,
+        "flagged": false
+      },
+      {
+        "hash": "2d6a5c447b18948e",
+        "earlyAvgReturn": 1.15,
+        "extendedAvgReturn": 1.1171859296482411,
+        "flagged": false
+      },
+      {
+        "hash": "7887ff3a8c2b574d",
+        "earlyAvgReturn": 1.01,
+        "extendedAvgReturn": 1.127638190954774,
+        "flagged": false
+      },
+      {
+        "hash": "34cdf0e1b927a697",
+        "earlyAvgReturn": 1.05,
+        "extendedAvgReturn": 1.1124120603015075,
+        "flagged": false
+      },
+      {
+        "hash": "da3aae697b3d7409",
+        "earlyAvgReturn": 1.02,
+        "extendedAvgReturn": 1.129497487437186,
+        "flagged": false
+      },
+      {
+        "hash": "1f1ef31aff384b5c",
+        "earlyAvgReturn": 1.18,
+        "extendedAvgReturn": 1.118994974874372,
+        "flagged": false
+      },
+      {
+        "hash": "7f4da11ac05c9ecc",
+        "earlyAvgReturn": 1.54,
+        "extendedAvgReturn": 1.1316582914572864,
+        "flagged": true
+      },
+      {
+        "hash": "c83531db458a4e74",
+        "earlyAvgReturn": 1.1,
+        "extendedAvgReturn": 1.1088442211055276,
+        "flagged": false
+      },
+      {
+        "hash": "3f46072231b5c046",
+        "earlyAvgReturn": 1.12,
+        "extendedAvgReturn": 1.1318592964824121,
+        "flagged": false
+      },
+      {
+        "hash": "05837d8d7474b249",
+        "earlyAvgReturn": 1.16,
+        "extendedAvgReturn": 1.127286432160804,
+        "flagged": false
+      },
+      {
+        "hash": "51d8efbc5bcb68d5",
+        "earlyAvgReturn": 1.19,
+        "extendedAvgReturn": 1.1226633165829145,
+        "flagged": false
+      },
+      {
+        "hash": "9e1d656bcb9005d8",
+        "earlyAvgReturn": 1.1,
+        "extendedAvgReturn": 1.122462311557789,
+        "flagged": false
+      },
+      {
+        "hash": "492287c06b2900e8",
+        "earlyAvgReturn": 1.29,
+        "extendedAvgReturn": 1.1251256281407036,
+        "flagged": false
+      },
+      {
+        "hash": "31a1318afd6cfee3",
+        "earlyAvgReturn": 1.38,
+        "extendedAvgReturn": 1.1303517587939698,
+        "flagged": false
+      },
+      {
+        "hash": "7d1064c3fddaaba2",
+        "earlyAvgReturn": 1.2,
+        "extendedAvgReturn": 1.1193467336683418,
+        "flagged": false
+      },
+      {
+        "hash": "e974f531a458b785",
+        "earlyAvgReturn": 1.17,
+        "extendedAvgReturn": 1.1238693467336685,
+        "flagged": false
+      },
+      {
+        "hash": "45ee24c75397834b",
+        "earlyAvgReturn": 1.22,
+        "extendedAvgReturn": 1.1182914572864322,
+        "flagged": false
+      },
+      {
+        "hash": "8c717a4ab0d96dc5",
+        "earlyAvgReturn": 1.2,
+        "extendedAvgReturn": 1.1334170854271357,
+        "flagged": false
+      },
+      {
+        "hash": "bfd784a395014775",
+        "earlyAvgReturn": 1.04,
+        "extendedAvgReturn": 1.1143718592964824,
+        "flagged": false
+      },
+      {
+        "hash": "ce1a7b4fab933f4e",
+        "earlyAvgReturn": 1.15,
+        "extendedAvgReturn": 1.1059798994974874,
+        "flagged": false
+      },
+      {
+        "hash": "dd41dae023e80c78",
+        "earlyAvgReturn": 0.79,
+        "extendedAvgReturn": 1.1349246231155778,
+        "flagged": true
+      },
+      {
+        "hash": "97de9350e59b2a6a",
+        "earlyAvgReturn": 1,
+        "extendedAvgReturn": 1.1099497487437187,
+        "flagged": false
+      },
+      {
+        "hash": "bb4d2266661c7be4",
+        "earlyAvgReturn": 1.16,
+        "extendedAvgReturn": 1.107386934673367,
+        "flagged": false
+      },
+      {
+        "hash": "a95383dd8df26e8d",
+        "earlyAvgReturn": 1.15,
+        "extendedAvgReturn": 1.1282412060301508,
+        "flagged": false
+      },
+      {
+        "hash": "981d7c37fccbba89",
+        "earlyAvgReturn": 1.14,
+        "extendedAvgReturn": 1.131608040201005,
+        "flagged": false
+      },
+      {
+        "hash": "626f282ed413aa92",
+        "earlyAvgReturn": 1.04,
+        "extendedAvgReturn": 1.1479899497487438,
+        "flagged": false
+      },
+      {
+        "hash": "5c8d0d0d20602d8e",
+        "earlyAvgReturn": 1.45,
+        "extendedAvgReturn": 1.1113065326633167,
+        "flagged": false
+      },
+      {
+        "hash": "65a1005125462ab0",
+        "earlyAvgReturn": 0.75,
+        "extendedAvgReturn": 1.1166834170854272,
+        "flagged": true
+      },
+      {
+        "hash": "e88902ca392a8f01",
+        "earlyAvgReturn": 1.23,
+        "extendedAvgReturn": 1.1085427135678392,
+        "flagged": false
+      },
+      {
+        "hash": "df522efff31ad890",
+        "earlyAvgReturn": 1.14,
+        "extendedAvgReturn": 1.1099497487437187,
+        "flagged": false
+      },
+      {
+        "hash": "dd807fb25f9a9878",
+        "earlyAvgReturn": 1.14,
+        "extendedAvgReturn": 1.1155778894472361,
+        "flagged": false
+      },
+      {
+        "hash": "f2e8f85c88b774c6",
+        "earlyAvgReturn": 0.91,
+        "extendedAvgReturn": 1.1148241206030152,
+        "flagged": false
+      },
+      {
+        "hash": "86525716901d3472",
+        "earlyAvgReturn": 1.43,
+        "extendedAvgReturn": 1.1314572864321608,
+        "flagged": false
+      },
+      {
+        "hash": "6e259af486771f85",
+        "earlyAvgReturn": 1.08,
+        "extendedAvgReturn": 1.1164321608040202,
+        "flagged": false
+      },
+      {
+        "hash": "29ea42f11e1cdd63",
+        "earlyAvgReturn": 0.95,
+        "extendedAvgReturn": 1.1252261306532663,
+        "flagged": false
+      },
+      {
+        "hash": "0c8e0bd7cfb570ad",
+        "earlyAvgReturn": 1.35,
+        "extendedAvgReturn": 1.1313065326633165,
+        "flagged": false
+      },
+      {
+        "hash": "823f244c871ef0b6",
+        "earlyAvgReturn": 0.75,
+        "extendedAvgReturn": 1.159396984924623,
+        "flagged": true
+      },
+      {
+        "hash": "ce42d21ebf2ca597",
+        "earlyAvgReturn": 1.27,
+        "extendedAvgReturn": 1.101959798994975,
+        "flagged": false
+      },
+      {
+        "hash": "4d85658a6cba3937",
+        "earlyAvgReturn": 1.13,
+        "extendedAvgReturn": 1.111859296482412,
+        "flagged": false
+      },
+      {
+        "hash": "bf019e200d38ea75",
+        "earlyAvgReturn": 1.16,
+        "extendedAvgReturn": 1.1116080402010051,
+        "flagged": false
+      },
+      {
+        "hash": "ce479a3ac272890f",
+        "earlyAvgReturn": 1.14,
+        "extendedAvgReturn": 1.1180904522613064,
+        "flagged": false
+      },
+      {
+        "hash": "3a861bf9fa7680c5",
+        "earlyAvgReturn": 1.12,
+        "extendedAvgReturn": 1.1137688442211056,
+        "flagged": false
+      },
+      {
+        "hash": "004ea5229361e9bc",
+        "earlyAvgReturn": 1.16,
+        "extendedAvgReturn": 1.115678391959799,
+        "flagged": false
+      },
+      {
+        "hash": "9f1a7a9b9f60f6ac",
+        "earlyAvgReturn": 0.84,
+        "extendedAvgReturn": 1.1101005025125628,
+        "flagged": false
+      },
+      {
+        "hash": "eeb391b742907e78",
+        "earlyAvgReturn": 1.29,
+        "extendedAvgReturn": 1.1228140703517588,
+        "flagged": false
+      },
+      {
+        "hash": "51558ff8078aee5a",
+        "earlyAvgReturn": 0.69,
+        "extendedAvgReturn": 1.118643216080402,
+        "flagged": true
+      },
+      {
+        "hash": "37d05071ddc18cbe",
+        "earlyAvgReturn": 1.15,
+        "extendedAvgReturn": 1.0919095477386935,
+        "flagged": false
+      },
+      {
+        "hash": "eae341ce0d15d7fd",
+        "earlyAvgReturn": 1.12,
+        "extendedAvgReturn": 1.109145728643216,
+        "flagged": false
+      },
+      {
+        "hash": "fa81b1510a3dbeaf",
+        "earlyAvgReturn": 1.12,
+        "extendedAvgReturn": 1.1269346733668342,
+        "flagged": false
+      },
+      {
+        "hash": "d2d01b5f295a343f",
+        "earlyAvgReturn": 1.05,
+        "extendedAvgReturn": 1.1344221105527639,
+        "flagged": false
+      },
+      {
+        "hash": "c83ecb18d02565ba",
+        "earlyAvgReturn": 1.11,
+        "extendedAvgReturn": 1.1309547738693468,
+        "flagged": false
+      },
+      {
+        "hash": "bdd5f0616c23b53b",
+        "earlyAvgReturn": 0.91,
+        "extendedAvgReturn": 1.1171356783919597,
+        "flagged": false
+      },
+      {
+        "hash": "19cfc69cff69b5ac",
+        "earlyAvgReturn": 1.13,
+        "extendedAvgReturn": 1.1057286432160804,
+        "flagged": false
+      },
+      {
+        "hash": "098691843a822d44",
+        "earlyAvgReturn": 1.17,
+        "extendedAvgReturn": 1.1358793969849246,
+        "flagged": false
+      },
+      {
+        "hash": "44021685a5ababf4",
+        "earlyAvgReturn": 1.18,
+        "extendedAvgReturn": 1.1303015075376885,
+        "flagged": false
+      },
+      {
+        "hash": "0936535bbd886b2c",
+        "earlyAvgReturn": 1.05,
+        "extendedAvgReturn": 1.114221105527638,
+        "flagged": false
+      },
+      {
+        "hash": "4aaa16689f437782",
+        "earlyAvgReturn": 1.02,
+        "extendedAvgReturn": 1.1347236180904523,
+        "flagged": false
+      },
+      {
+        "hash": "2d99c5dd86a49049",
+        "earlyAvgReturn": 1.53,
+        "extendedAvgReturn": 1.1014070351758793,
+        "flagged": true
+      },
+      {
+        "hash": "c6c2f25a7f412b1d",
+        "earlyAvgReturn": 0.98,
+        "extendedAvgReturn": 1.1231155778894473,
+        "flagged": false
+      },
+      {
+        "hash": "a7e92a74417c26c4",
+        "earlyAvgReturn": 1.21,
+        "extendedAvgReturn": 1.1152763819095477,
+        "flagged": false
+      },
+      {
+        "hash": "4fc898b4ca06480f",
+        "earlyAvgReturn": 1.06,
+        "extendedAvgReturn": 1.1203517587939698,
+        "flagged": false
+      },
+      {
+        "hash": "9d78f55fadd3fd9a",
+        "earlyAvgReturn": 1.28,
+        "extendedAvgReturn": 1.1290954773869346,
+        "flagged": false
+      },
+      {
+        "hash": "869d43bde40281ca",
+        "earlyAvgReturn": 0.87,
+        "extendedAvgReturn": 1.1329145728643215,
+        "flagged": false
+      },
+      {
+        "hash": "d256821c0c513a7a",
+        "earlyAvgReturn": 0.96,
+        "extendedAvgReturn": 1.112462311557789,
+        "flagged": false
+      },
+      {
+        "hash": "ebc101898c07bcf7",
+        "earlyAvgReturn": 1.1,
+        "extendedAvgReturn": 1.1450251256281407,
+        "flagged": false
+      },
+      {
+        "hash": "cfcc3129a725d34b",
+        "earlyAvgReturn": 1.03,
+        "extendedAvgReturn": 1.1303015075376885,
+        "flagged": false
+      },
+      {
+        "hash": "5f4f5c1c768286ab",
+        "earlyAvgReturn": 1.01,
+        "extendedAvgReturn": 1.1173366834170855,
+        "flagged": false
+      },
+      {
+        "hash": "e18f4b87c0d30b8c",
+        "earlyAvgReturn": 1.11,
+        "extendedAvgReturn": 1.1132663316582914,
+        "flagged": false
+      },
+      {
+        "hash": "aef058e5955bdf4f",
+        "earlyAvgReturn": 0.71,
+        "extendedAvgReturn": 1.1270854271356785,
+        "flagged": true
+      },
+      {
+        "hash": "9960253e3c0230c4",
+        "earlyAvgReturn": 0.84,
+        "extendedAvgReturn": 1.1196482412060302,
+        "flagged": false
+      },
+      {
+        "hash": "7092ae2aa82f9f3b",
+        "earlyAvgReturn": 1.01,
+        "extendedAvgReturn": 1.1256281407035176,
+        "flagged": false
+      },
+      {
+        "hash": "63f4480409a06797",
+        "earlyAvgReturn": 1.3,
+        "extendedAvgReturn": 1.1289447236180905,
+        "flagged": false
+      },
+      {
+        "hash": "4f6536ef5d340b1b",
+        "earlyAvgReturn": 1.08,
+        "extendedAvgReturn": 1.1231155778894473,
+        "flagged": false
+      },
+      {
+        "hash": "a7be97b83108d7cc",
+        "earlyAvgReturn": 1.52,
+        "extendedAvgReturn": 1.1086934673366835,
+        "flagged": true
+      },
+      {
+        "hash": "d17fefa477eaef0b",
+        "earlyAvgReturn": 0.99,
+        "extendedAvgReturn": 1.1232663316582914,
+        "flagged": false
+      },
+      {
+        "hash": "c5b8967ce19c9cdb",
+        "earlyAvgReturn": 1.13,
+        "extendedAvgReturn": 1.1133668341708542,
+        "flagged": false
+      },
+      {
+        "hash": "1792a4aeb7e01917",
+        "earlyAvgReturn": 0.95,
+        "extendedAvgReturn": 1.1115577889447237,
+        "flagged": false
+      },
+      {
+        "hash": "92df87204c3d3f65",
+        "earlyAvgReturn": 1.25,
+        "extendedAvgReturn": 1.1366834170854272,
+        "flagged": false
+      },
+      {
+        "hash": "78ce6ec51359c96f",
+        "earlyAvgReturn": 0.85,
+        "extendedAvgReturn": 1.1168341708542713,
+        "flagged": false
+      },
+      {
+        "hash": "c10371b996eb21e1",
+        "earlyAvgReturn": 1.03,
+        "extendedAvgReturn": 1.1364824120603014,
+        "flagged": false
+      },
+      {
+        "hash": "205c21112b86b3f2",
+        "earlyAvgReturn": 1.04,
+        "extendedAvgReturn": 1.1160804020100503,
+        "flagged": false
+      }
+    ]
+  }
+}

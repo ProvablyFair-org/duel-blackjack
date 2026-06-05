@@ -1,0 +1,230 @@
+{
+  "generatedAt": "2026-06-05T03:28:35.212Z",
+  "totalBets": 6000,
+  "totalSeeds": 121,
+  "revealedSeeds": 120,
+  "steps": [
+    {
+      "step": 1,
+      "name": "Seed Hash Integrity",
+      "status": "PASS",
+      "detail": "120/120 revealed seeds: SHA-256(hex_decode(serverSeed)) matches commitment. 0 failures."
+    },
+    {
+      "step": 2,
+      "name": "Commitment Linkage",
+      "status": "PASS",
+      "detail": "120/120 consecutive seed links verified. 0 broken."
+    },
+    {
+      "step": 3,
+      "name": "Hash Consistency Within Epoch",
+      "status": "PASS",
+      "detail": "All 120 epochs internally consistent. 0 inconsistent."
+    },
+    {
+      "step": 4,
+      "name": "Nonce Audit",
+      "status": "PASS",
+      "detail": "120 epochs. 7 nonce gaps observed; the missing nonces are not in the captured dataset. Revealed seeds permit deterministic derivation of the cursor-0 card for each gap (and no captured bet uses those nonces), but the missing games themselves are not verified. 0 unverifiable. 1->3 (seed d1ec528647780f2f, missing 2, would-be cursor-0 card: QS); 34->36 (seed 34cdf0e1b927a697, missing 35, would-be cursor-0 card: 4D); 10->12 (seed c83531db458a4e74, missing 11, would-be cursor-0 card: 8H); 14->16 (seed 45ee24c75397834b, missing 15, would-be cursor-0 card: 10H); 36->38 (seed 981d7c37fccbba89, missing 37, would-be cursor-0 card: 3D); 6->8 (seed 86525716901d3472, missing 7, would-be cursor-0 card: 3D); 23->25 (seed 004ea5229361e9bc, missing 24, would-be cursor-0 card: 6S)"
+    },
+    {
+      "step": 5,
+      "name": "Outcome Recomputation",
+      "status": "PASS",
+      "detail": "6000/6000 hands recomputed (33194 card cursors verified — strict ordering for non-split, multiset for split). 0 mismatches, 0 skipped."
+    },
+    {
+      "step": 6,
+      "name": "Client Seed Influence",
+      "status": "PASS",
+      "detail": "99/100 sampled bets produce different cards with wrong client seed (99.0%). PASS criterion: changed >= 95% of sampled (>= 95/100); observed: YES."
+    },
+    {
+      "step": 7,
+      "name": "Payout Math",
+      "status": "PASS",
+      "detail": "6000/6000 bets reconciled (expected = main + side bet wins, ±1e-6). 0 mismatched, 0 skipped."
+    },
+    {
+      "step": 8,
+      "name": "Multiplier Provenance",
+      "status": "PASS",
+      "detail": "PP: 5800 checked, 0 mismatches. 21+3: 5800 checked, 0 mismatches."
+    },
+    {
+      "step": 9,
+      "name": "Bet-Size Invariance",
+      "status": "PASS",
+      "detail": "200/200 Phase E ($10) hands recompute byte-equal cards from (serverSeed, clientSeed, nonce, cursor) — strict for non-split, multiset for split. Stake is not an HMAC input (`getCard` signature contains no wager parameter), so the same procedure that verifies $0.01 hands in Step 5 works identically here; this is a structural property of the RNG, not a per-stake observation."
+    },
+    {
+      "step": 10,
+      "name": "Captured effective_edge Field Consistency",
+      "status": "PASS",
+      "detail": "Main edge=0.1: 6000/6000. PP edge=0: 5800/5800. 21+3 edge=0: 5800/5800."
+    },
+    {
+      "step": 11,
+      "name": "Config Completeness",
+      "status": "PASS",
+      "detail": "PP types observed: Perfect Pair, Colored Pair, Mixed Pair. 21+3 types: Flush, Straight, Three of a Kind, Straight Flush, Suited Trips."
+    },
+    {
+      "step": 12,
+      "name": "Epoch Size",
+      "status": "PASS",
+      "detail": "120 epochs. Size range: 50–50 bets per epoch. PASS criterion: every epoch contains exactly 50 bets (the platform cap). 0 epochs deviated."
+    },
+    {
+      "step": 13,
+      "name": "Phase Labels",
+      "status": "PASS",
+      "detail": "Phases present: A, B, C, D, E, F. Missing: none. Extra: none."
+    },
+    {
+      "step": 14,
+      "name": "Dataset Hash",
+      "status": "PASS",
+      "detail": "Actual SHA-256: ad9cdffcea2f6cf535361e2265ae0bf95bb1290b3bbf9fee70dda053d917fe12. Expected: ad9cdffcea2f6cf535361e2265ae0bf95bb1290b3bbf9fee70dda053d917fe12. Match."
+    },
+    {
+      "step": 15,
+      "name": "Phase D Client Seed Variation",
+      "status": "PASS",
+      "detail": "500 hands; 10 unique auditor client seeds (pfaudit_bj_seed00, pfaudit_bj_seed01, pfaudit_bj_seed02…). Recompute: 500 ok, 0 failed, 0 skipped."
+    },
+    {
+      "step": 16,
+      "name": "Anti-Circularity (Optimal-Play RTP Engine)",
+      "status": "PASS",
+      "detail": "Optimal-play RTP: 99.4296% (S17, DAS, no surrender, no re-split, infinite deck). Blackjack RTP engine takes NO casino input — only rules + 13-rank distribution. Side-bet EV consistency (casino-published multiplier table fed in): PP EV = 0.000000% (zero by table balance), 21+3 EV = -0.0000% (near-zero by table balance). The side-bet EV check is an internal-consistency test of the published table — it does not verify the multipliers from first principles. [Cross-check, informational] WoO reference for Duel's exact rules (infinite-deck S17+DAS, no surrender, no re-split) 99.4296%, Δ=0.0000 pp (within 0.02 pp tolerance)."
+    },
+    {
+      "step": 17,
+      "name": "Simulation Pass 1",
+      "status": "PASS",
+      "detail": "Fisher's p=0.686432, serial independence fails=0. 10000000 rounds."
+    },
+    {
+      "step": 18,
+      "name": "Pass 2 Cherry-Pick Detection",
+      "status": "PASS",
+      "detail": "11/120 seeds flagged. Binomial p=0.038450 — marginal under a single-test interpretation; not significant under the predeclared threshold after multiple-testing correction."
+    },
+    {
+      "step": 19,
+      "name": "Dealer Rule Compliance",
+      "status": "PASS",
+      "detail": "4226 hands where dealer played out (others skipped — player BJ, dealer BJ, or all player hands resolved). 4226 compliant, 0 violations. Soft-17 outcomes: 0 hits, 75 stands → stand (S17)."
+    },
+    {
+      "step": 20,
+      "name": "Blackjack Payout (3:2)",
+      "status": "PASS",
+      "detail": "260/260 naturals pay 2.5× main (3:2 net) plus side bets. 0 wrong."
+    },
+    {
+      "step": 21,
+      "name": "Double Payout",
+      "status": "PASS",
+      "detail": "1291/1291 bets with at least one doubled hand reconcile (1368 doubled hands total). win=4× / push=2× / lose=0 per doubled hand."
+    },
+    {
+      "step": 22,
+      "name": "Split Card Multiset Consistency",
+      "status": "PASS",
+      "detail": "269/269 split bets: every visible card across both sub-hands and the dealer hand matches a unique cursor 0..N-1 from the seed. 0 failed."
+    },
+    {
+      "step": 23,
+      "name": "Split Rules Verification",
+      "status": "PASS",
+      "detail": "269 splits. Matching-rank-only: 269/269 (0 violations). DAS observed: 109. Re-splits: 0. Ace splits one-card-only: 34/34 (0 violations)."
+    },
+    {
+      "step": 24,
+      "name": "Split Payout Independence",
+      "status": "PASS",
+      "detail": "269/269 split bets reconcile to the sum of per-hand settlements (each hand vs dealer independently). 0 mismatched."
+    },
+    {
+      "step": 25,
+      "name": "Insurance Prompt Condition",
+      "status": "PASS",
+      "detail": "462 insurance prompts, all declined by the capture script (no payout side exercised — see recommendations.md R-INSURANCE). 462 on dealer Ace upcard, 0 on non-Ace (must be 0). Prompt-offer condition correct: YES."
+    },
+    {
+      "step": 26,
+      "name": "Perfect Pairs + 21+3 Payout",
+      "status": "PASS",
+      "detail": "PP: 5800 reconciled, 0 mismatched. 21+3: 5800 reconciled, 0 mismatched. amount_won = multiplier × amount_placed at API precision."
+    },
+    {
+      "step": 27,
+      "name": "Side Bet Independence",
+      "status": "PASS",
+      "detail": "PP: 5800 unchanged across deal→final, 0 changed. 21+3: 5800 unchanged, 0 changed. This step proves the side-bet result is deal-time invariant — it does not mutate as the main hand plays out. The companion claim that the side-bet inputs are exactly cursors 0, 2, 1 (P1, P2, dealer upcard) is established by Step 8's independent reclassification from those three cards."
+    },
+    {
+      "step": 28,
+      "name": "Available Actions Set",
+      "status": "PASS",
+      "detail": "14313/14313 action lists are subsets of {hit, stand, double, split, insurance, no_insurance}. surrender appearances: 0 (rules state 0). "
+    },
+    {
+      "step": 29,
+      "name": "Infinite-Deck Confirmation",
+      "status": "PASS",
+      "detail": "1354 / 6000 hands contain ≥2 visible cards with identical rank+suit (only possible under infinite-deck draw with replacement). Examples: bet 13418615: 2C appeared ≥2× | bet 13418640: 7C appeared ≥2× | bet 13418645: 4D appeared ≥2×."
+    },
+    {
+      "step": 30,
+      "name": "Outcome Distribution",
+      "status": "PASS",
+      "detail": "6269/6269 player hands have a result field. Buckets: blackjack=260, bust=1318, lose=1916, push=514, win=2261. surrender=0 (rules state 0). "
+    },
+    {
+      "step": 31,
+      "name": "Side Bet Stake Equality",
+      "status": "PASS",
+      "detail": "PP stake = main stake: 5800/5800. 21+3 stake = main stake: 5800/5800. "
+    },
+    {
+      "step": 32,
+      "name": "Initial Deal Structure",
+      "status": "PASS",
+      "detail": "6000/6000 deals show valid initial structure (2 player cards + 2 dealer cards; dealer hole face-down except for 443 auto-resolved BJ hands where it is legitimately revealed). Failures: 2-player-cards 0, 2-dealer-cards 0, 1-hole-when-required 0. "
+    },
+    {
+      "step": 33,
+      "name": "Stake Bracket Bounds",
+      "status": "PASS",
+      "detail": "6000/6000 bets at the expected stake for their phase (A/B/C/D/F=$0.01, E=$10). "
+    }
+  ],
+  "info": [
+    {
+      "label": "Outcome Distribution",
+      "detail": "win: 2261 (36.1%), lose: 1916 (30.6%), bust: 1318 (21.0%), push: 514 (8.2%), blackjack: 260 (4.1%)"
+    },
+    {
+      "label": "Natural BJ Frequency",
+      "detail": "260/6000 = 4.33% (expected 4.73% = 8/169)"
+    },
+    {
+      "label": "PP Hit Rate",
+      "detail": "459/5800 = 7.91% (expected 7.69% = 4/52)"
+    },
+    {
+      "label": "21+3 Hit Rate",
+      "detail": "569/5800 = 9.81% (expected ~9.88%)"
+    }
+  ],
+  "summary": {
+    "passed": 33,
+    "flags": 0,
+    "hardFail": 0,
+    "verdict": "PROVABLY FAIR — Full Pass"
+  }
+}
