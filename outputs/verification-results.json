@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T03:28:35.212Z",
+  "generatedAt": "2026-09-14T20:46:10.929Z",
   "totalBets": 6000,
   "totalSeeds": 121,
   "revealedSeeds": 120,
@@ -201,6 +201,12 @@
       "name": "Stake Bracket Bounds",
       "status": "PASS",
       "detail": "6000/6000 bets at the expected stake for their phase (A/B/C/D/F=$0.01, E=$10). "
+    },
+    {
+      "step": 34,
+      "name": "Artifact Integrity (pinned artifacts of record)",
+      "status": "PASS",
+      "detail": "2 artifact(s) checked against src/artifact-pins.ts; rtp-convergence.html matches its pin; simulation-results.json matches its pin"
     }
   ],
   "info": [
@@ -222,7 +228,7 @@
     }
   ],
   "summary": {
-    "passed": 33,
+    "passed": 34,
     "flags": 0,
     "hardFail": 0,
     "verdict": "PROVABLY FAIR — Full Pass"

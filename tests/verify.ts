@@ -17,6 +17,7 @@ import * as simulation   from './steps/simulation';
 import * as gameSpecific from './steps/game-specific';
 import * as rules        from './steps/rules';
 import * as statistical  from './steps/statistical';
+import * as artifacts   from './steps/artifacts';
 
 // ── Pre-flight: dataset hash ───────────────────────────────────────────────────
 
@@ -72,6 +73,7 @@ const results = [
   ...simulation.run(ctx),    // Steps 16–18
   ...gameSpecific.run(ctx),  // Steps 19–27
   ...rules.run(ctx),         // Steps 28–33  (game-rule coverage)
+  ...artifacts.run(ctx),    // Step 34
 ];
 
 // ── Run informational items ──────────────────────────────────────────────────
