@@ -12,7 +12,7 @@ const DATASET_FILE = 'blackjack-dataset-6000hands.json';
 const DATASET_PATH = path.join(DATA_DIR, DATASET_FILE);
 
 // Pinned SHA-256 of data/blackjack-dataset-6000hands.json
-export const EXPECTED_HASH = 'ad9cdffcea2f6cf535361e2265ae0bf95bb1290b3bbf9fee70dda053d917fe12';
+export const EXPECTED_HASH = '55d4b4b1850856c8a3ecf6e59021f1f80bb3d8053376c42929e58b6733b8cae4';
 
 export interface BJBet {
   id: number;

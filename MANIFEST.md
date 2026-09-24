@@ -29,7 +29,7 @@ Side bets (Perfect Pairs, 21+3) are evaluated against the initial 3-card snapsho
 ## Dataset
 
 - **File:** `data/blackjack-dataset-6000hands.json`
-- **SHA-256:** `ad9cdffcea2f6cf535361e2265ae0bf95bb1290b3bbf9fee70dda053d917fe12`
+- **SHA-256:** `55d4b4b1850856c8a3ecf6e59021f1f80bb3d8053376c42929e58b6733b8cae4`
 - **Primary bets:** 6,000
 - **Side bets:** 5,800 (Phase E placed no side bets)
 - **Seed entries:** 121 (120 used + 1 forward commitment after final rotation)
