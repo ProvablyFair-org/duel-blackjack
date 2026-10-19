@@ -1,0 +1,40 @@
+{
+  "package": "duel/blackjack",
+  "game": "blackjack",
+  "settingSpace": "one setting: the main bet under Duel's declared rules (infinite deck, dealer stands on soft 17, double after split, no surrender, no re-split), optimal play; the side bets (Perfect Pairs, 21+3) are not in this table",
+  "rtpMethod": "exact rational: the independent oracle anchor/oracle.py (Python Fractions) for the declared rules, pinned in src/config.ts ORACLE_RTP.stand; Step 16 requires the engine src/optimal-play.ts to equal it within 1e-12; RTP per initial bet",
+  "rule": "RTP-CLAIM",
+  "ruleVersion": "1.2.0 (Methodology v1.1: places, per-setting, stake tiers, noted, published, RTP Figure Overstated; agreed 2026-10-14; 1.1.0 2026-10-01; 1.0.0 2026-09-29)",
+  "bandPp": "0.10",
+  "claim": {
+    "kind": "flat",
+    "rtp": "0.9943",
+    "source": "Duel staff statement, not one of the six places: a Duel staff member gave blackjack's house edge as 0.57% in a post relayed to ProvablyFair.org on 1 May 2026 (evidence/E19-duel-blackjack-edge-statements.md §2; the post was not retrieved), as MANIFEST.md#duels-stated-edge documents it and Methodology v1.1 D4 cites it (\"Blackjack (99.43%)\"). The game settings (E18) state house_edge 0.001 on the main bet's first scaling-edge tier, which Duel describes as the net edge after its rakeback (E19 §1): a rakeback line, noted, not tested (D3)"
+  },
+  "settings": 1,
+  "trueMin": {
+    "setting": "main bet, optimal play (infinite deck, S17, DAS, no surrender, no re-split), per initial bet",
+    "rtpExact": "7016161098045143337706614398/7056410014866816666030739693",
+    "rtpPct": "99.429612"
+  },
+  "trueMax": {
+    "setting": "main bet, optimal play (infinite deck, S17, DAS, no surrender, no re-split), per initial bet",
+    "rtpExact": "7016161098045143337706614398/7056410014866816666030739693",
+    "rtpPct": "99.429612"
+  },
+  "houseSideFailures": 0,
+  "playerFavourable": 0,
+  "worst": {
+    "setting": "main bet, optimal play (infinite deck, S17, DAS, no surrender, no re-split), per initial bet",
+    "gapPp": "-0.000388"
+  },
+  "rangeChecks": [],
+  "outcome": "PASS",
+  "minimalFix": "none — the claim holds for every setting it states a figure for",
+  "unstated": 0,
+  "rowsComplete": true,
+  "buckets": [],
+  "rows": [
+    {"setting":"main bet, optimal play (infinite deck, S17, DAS, no surrender, no re-split), per initial bet","rtpExact":"7016161098045143337706614398/7056410014866816666030739693","rtpPct":"99.429612","gapPp":"-0.000388","side":"within-band","outcome":"PASS"}
+  ]
+}

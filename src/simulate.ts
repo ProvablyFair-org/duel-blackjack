@@ -21,33 +21,44 @@
  * Pass 2 — Captured casino seeds × 10,000 nonces (cherry-pick detection).
  *   Early-nonce window vs extended nonces per seed.
  *
- * Output: outputs/simulation-results.json + outputs/rtp-convergence.html
+ * Output: simulation-results.json + rtp-convergence.html.
+ *
+ * OUTPUT DIRECTORY. The committed copies in outputs/ are pinned artifacts of record
+ * (src/artifact-pins.ts, scored by verify Step 34). A run must not silently overwrite them:
+ * PF_EMIT=1 (`npm run simulate`) rewrites the pinned artifacts — the author, on a deliberate
+ * regeneration that re-pins them in the same commit; otherwise (`npm run simulate:run`, which
+ * `npm run test:full` calls) the run lands in outputs/run/ and verify field-diffs it against the
+ * committed copy at the reproduction tolerance.
  */
 
 import * as fs     from 'fs';
 import * as path   from 'path';
 import * as crypto from 'crypto';
 
-import { getCardWithKey, handValue, isBlackjack, cardRank, DEAL_ORDER } from './rng';
-import { getOptimalAction, shouldDealerHit } from './strategy';
+import { getCardWithKey } from './rng';
+import { simulateHand, SOFT17_RULE, DAS_ALLOWED } from './sim-hand';
 import { loadDataset, buildSeedMap } from './loader';
 import { computeOptimalRTP } from './optimal-play';
+import { chi2PValue, normalCDF, inverseNormalCDF, binomialP } from './stats';
+import { renderConvergenceHtml } from './chart';
+import { windowSums, testC, TEST_C_WINDOW, TEST_C_WINDOWS, TEST_C_ALPHA, TEST_C_FLAG_RANK, TEST_C_NULL_P, flagBound } from './cherry-pick';
+import { RETIRED_FIGURE_FORMERLY_CALLED_WOO } from './config';
+import { PASS1_STREAMS, PASS1_ROUNDS_EACH, PASS1_ROUNDS_TOTAL, PASS2_NONCES, EARLY_WINDOW, SERIAL_ALPHA_FAMILY, CHERRY_ALPHA } from './sim-plan';
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 
-const PASS1_STREAMS      = 10;
-const PASS1_ROUNDS_EACH  = 1_000_000;
-const PASS1_ROUNDS_TOTAL = PASS1_STREAMS * PASS1_ROUNDS_EACH;
-const PASS2_NONCES       = 10_000;
-const EARLY_WINDOW       = 50;
-// Confirmed from dataset (verify.ts Step 19 — 0 hits, 75 stands on dealer soft 17)
-const SOFT17_RULE: 'stand' | 'hit' = 'stand';
-// Double-after-split allowed (verify.ts Step 23 — 109 DAS observed in 269 splits)
-const DAS_ALLOWED = true;
+// PASS1_STREAMS, PASS1_ROUNDS_EACH, PASS1_ROUNDS_TOTAL, PASS2_NONCES, EARLY_WINDOW: src/sim-plan.ts
+// SOFT17_RULE and DAS_ALLOWED: src/sim-hand.ts, read from src/config.ts RULES.
 
 const CONVERGENCE_POINTS = [1_000, 5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000];
+export const FIRST_CARD_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-const OUT_DIR = path.join(__dirname, '..', 'outputs');
+// PF_EMIT=1 rewrites the pinned artifacts; otherwise the run lands in outputs/run/ so test:full can
+// diff it against the committed copy without touching the evidence it scores.
+const PF_EMIT  = process.env.PF_EMIT === '1';
+const OUT_BASE = path.join(__dirname, '..', 'outputs');
+const OUT_DIR  = PF_EMIT ? OUT_BASE : path.join(OUT_BASE, 'run');
+const OUT_LABEL = PF_EMIT ? 'outputs' : 'outputs/run';
 
 // Pass 1 simulation seeds — one unique pair per stream.
 // Generated once via crypto.randomBytes(32/16), pinned for reproducibility:
@@ -67,33 +78,6 @@ const SIM_SEEDS: Array<{ server: string; client: string }> = [
 ];
 
 // ── Stats Functions ──────────────────────────────────────────────────────────
-
-function lnGamma(z: number): number {
-  const c = [0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
-  if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
-  z -= 1; let x = c[0];
-  for (let i = 1; i < 9; i++) x += c[i] / (z + i);
-  const t = z + 7.5;
-  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
-}
-
-function gammaLower(a: number, x: number): number {
-  let sum = 1 / a, term = 1 / a;
-  for (let n = 1; n <= 200; n++) { term *= x / (a + n); sum += term; if (Math.abs(term) < Math.abs(sum) * 1e-15) break; }
-  return sum * Math.exp(-x + a * Math.log(x) - lnGamma(a));
-}
-
-function gammaUpper(a: number, x: number): number {
-  let f = 1e-30, C = f, D = 0;
-  for (let i = 1; i <= 200; i++) { const an = i * (a - i), bn = x + 2 * i + 1 - a; D = bn + an * D; if (Math.abs(D) < 1e-30) D = 1e-30; D = 1 / D; C = bn + an / C; if (Math.abs(C) < 1e-30) C = 1e-30; f *= C * D; if (Math.abs(C * D - 1) < 1e-15) break; }
-  return Math.exp(-x + a * Math.log(x) - lnGamma(a)) / (x + 1 - a + 1 / f);
-}
-
-function chi2PValue(stat: number, df: number): number {
-  if (stat <= 0) return 1;
-  const a = df / 2, x = stat / 2;
-  return x < a + 1 ? 1 - gammaLower(a, x) : gammaUpper(a, x);
-}
 
 function lag1Auto(values: number[]): { r: number; z: number } {
   const n = values.length;
@@ -119,162 +103,6 @@ function runsTest(values: number[]): { z: number; pValue: number } {
   const z = varRuns > 0 ? (runs - expRuns) / Math.sqrt(varRuns) : 0;
   const p = 2 * (1 - normalCDF(Math.abs(z)));
   return { z, pValue: p };
-}
-
-// High-precision complementary error function (Chiarella & Reichel, after
-// Cody 1969). Relative error < ~1e-15 across the real line — the body-of-
-// distribution Abramowitz-Stegun approximation it replaces loses precision
-// beyond |z| ≈ 3 and gave a noticeably wrong Z_CRIT_BONF (3.2026 vs 3.2905).
-function erfc(x: number): number {
-  const ax = Math.abs(x);
-  // Rational Chebyshev approximation for the tail (|x| ≥ 0.5); coefficients
-  // from W. J. Cody, "Rational Chebyshev Approximations for the Error Function"
-  // (Math. Comp. 23 (1969), 631-637), expressed via the t = 1/(1 + 0.5*|x|)
-  // substitution — numerically stable from 0 out into the deep tail.
-  const t = 1 / (1 + 0.5 * ax);
-  const ans = t * Math.exp(
-    -ax * ax -
-    1.26551223 +
-    t * (1.00002368 +
-    t * (0.37409196 +
-    t * (0.09678418 +
-    t * (-0.18628806 +
-    t * (0.27886807 +
-    t * (-1.13520398 +
-    t * (1.48851587 +
-    t * (-0.82215223 +
-    t * 0.17087277))))))))
-  );
-  return x >= 0 ? ans : 2 - ans;
-}
-
-function normalCDF(z: number): number {
-  return 0.5 * erfc(-z / Math.SQRT2);
-}
-
-// ── Simulate one blackjack hand ──────────────────────────────────────────────
-
-interface HandResult {
-  playerReturn: number;    // total returned across all sub-hands (incl. wager)
-  wager: number;           // total wagered (1 normal, 2 doubled, 2 split, 4 split+double, etc.)
-  outcome: 'win' | 'lose' | 'push' | 'blackjack' | 'bust'; // outcome of the first sub-hand (for tagging)
-}
-
-interface PlayerHand {
-  cards: string[];
-  fromSplitAces: boolean;  // one-card-only rule
-  doubled: boolean;
-}
-
-function simulateHand(keyBuffer: Buffer, clientSeed: string, nonce: number): HandResult {
-  let cursor = 0;
-  function draw(): string { return getCardWithKey(keyBuffer, clientSeed, nonce, cursor++); }
-
-  // Initial deal: P1, D1, P2, D2
-  const p1 = draw();
-  const d1 = draw();
-  const p2 = draw();
-  const d2 = draw();
-
-  const dealerCards = [d1, d2];
-
-  // Naturals (peek rule: dealer checks for BJ on 10/A upcard)
-  const playerBJ = isBlackjack([p1, p2]);
-  const dealerBJ = isBlackjack(dealerCards);
-
-  if (playerBJ && dealerBJ) return { playerReturn: 1, wager: 1, outcome: 'push' };
-  if (playerBJ)             return { playerReturn: 2.5, wager: 1, outcome: 'blackjack' };
-  if (dealerBJ)             return { playerReturn: 0, wager: 1, outcome: 'lose' };
-
-  // Build hand list, possibly splitting once (no re-split — matches dataset)
-  let hands: PlayerHand[] = [{ cards: [p1, p2], fromSplitAces: false, doubled: false }];
-  let totalWager = 1;
-
-  // Check for split on initial pair (matching rank only)
-  if (cardRank(p1) === cardRank(p2)) {
-    const action = getOptimalAction([p1, p2], d1, /*canSplit=*/true, /*canDouble=*/true);
-    if (action === 'P') {
-      const isAces = cardRank(p1) === 'A';
-      const h1: PlayerHand = { cards: [p1, draw()], fromSplitAces: isAces, doubled: false };
-      const h2: PlayerHand = { cards: [p2, draw()], fromSplitAces: isAces, doubled: false };
-      hands = [h1, h2];
-      totalWager = 2;
-    }
-  }
-
-  // Play each hand
-  for (const h of hands) {
-    if (h.fromSplitAces) continue; // one card only, already drawn
-
-    while (true) {
-      const hv = handValue(h.cards);
-      if (hv.best >= 21) break;
-
-      const canDouble = h.cards.length === 2 && (hands.length === 1 || DAS_ALLOWED);
-      const action = getOptimalAction(h.cards, d1, /*canSplit=*/false, canDouble);
-
-      if (action === 'H') {
-        h.cards.push(draw());
-      } else if (action === 'D') {
-        h.cards.push(draw());
-        h.doubled = true;
-        totalWager += 1; // additional wager equal to original
-        break;
-      } else if (action === 'Ds') {
-        // Double if allowed, else stand
-        if (canDouble) {
-          h.cards.push(draw());
-          h.doubled = true;
-          totalWager += 1;
-        }
-        break;
-      } else {
-        break; // stand
-      }
-    }
-  }
-
-  // Dealer plays unless every player hand is bust
-  const allBust = hands.every(h => handValue(h.cards).best > 21);
-  if (!allBust) {
-    while (shouldDealerHit(dealerCards, SOFT17_RULE)) {
-      dealerCards.push(draw());
-    }
-  }
-  const dealerHV = handValue(dealerCards);
-
-  // Resolve each hand independently
-  let totalReturn = 0;
-  let firstOutcome: HandResult['outcome'] = 'push';
-  for (let i = 0; i < hands.length; i++) {
-    const h = hands[i];
-    const hv = handValue(h.cards);
-    const handWager = h.doubled ? 2 : 1;
-    let ret = 0;
-    let outcome: HandResult['outcome'] = 'push';
-
-    if (hv.best > 21) {
-      outcome = 'bust';
-      ret = 0;
-    } else if (dealerHV.best > 21) {
-      outcome = 'win';
-      ret = 2 * handWager;
-    } else if (hv.best > dealerHV.best) {
-      outcome = 'win';
-      ret = 2 * handWager;
-    } else if (hv.best === dealerHV.best) {
-      outcome = 'push';
-      ret = 1 * handWager;
-    } else {
-      outcome = 'lose';
-      ret = 0;
-    }
-
-    totalReturn += ret;
-    if (i === 0) firstOutcome = outcome;
-  }
-
-  return { playerReturn: totalReturn, wager: totalWager, outcome: firstOutcome };
 }
 
 // ── Progress bar ─────────────────────────────────────────────────────────────
@@ -332,6 +160,9 @@ async function main(): Promise<void> {
     const keyBuffer = Buffer.from(seed.server, 'hex');
 
     const outcomes: Record<string, number> = { win: 0, lose: 0, push: 0, blackjack: 0, bust: 0 };
+    // First card (cursor 0) rank census for the per-stream uniformity test (profile BLACKJACK-20),
+    // re-derived by verify Step 17 from these counts.
+    const firstCardRanks: Record<string, number> = Object.fromEntries(FIRST_CARD_RANKS.map(r => [r, 0]));
     let streamWagered = 0, streamReturned = 0;
     let streamSumProfit = 0, streamSumProfitSq = 0;
     const streamProfits: number[] = [];
@@ -340,6 +171,7 @@ async function main(): Promise<void> {
     for (let n = 0; n < PASS1_ROUNDS_EACH; n++) {
       const result = simulateHand(keyBuffer, seed.client, n);
       outcomes[result.outcome]++;
+      firstCardRanks[getCardWithKey(keyBuffer, seed.client, n, 0).slice(0, -1)]++;
       streamWagered += result.wager;
       streamReturned += result.playerReturn;
       // Profit per round (= playerReturn − totalWager). For a $1 initial wager
@@ -380,6 +212,8 @@ async function main(): Promise<void> {
       lag1Z: lag.z,
       runsZ: runs.z,
       runsP: runs.pValue,
+      firstCardRanks,
+      wagered: streamWagered,
     });
 
     totalWagered += streamWagered;
@@ -423,19 +257,9 @@ async function main(): Promise<void> {
   // 10 streams → α/N = 0.001 per stream. For the lag-1 z-test the matching
   // two-sided z critical is ≈ 3.291; for the runs test we compare the raw
   // p-value to α/N.
-  const ALPHA_FAMILY = 0.01;
+  const ALPHA_FAMILY = SERIAL_ALPHA_FAMILY;
   const ALPHA_PER_STREAM = ALPHA_FAMILY / PASS1_STREAMS;
-  // Inverse standard normal at 1 - α/2 (two-sided); Newton on normalCDF.
-  function inverseNormalCDF(targetCDF: number): number {
-    let z = 0;
-    for (let i = 0; i < 60; i++) {
-      const cdf = normalCDF(z);
-      const pdf = Math.exp(-(z * z) / 2) / Math.sqrt(2 * Math.PI);
-      if (pdf < 1e-30) break;
-      z = z + (targetCDF - cdf) / pdf;
-    }
-    return z;
-  }
+  // Inverse standard normal at 1 - α/2 (two-sided); Newton on normalCDF (src/stats.ts).
   const Z_CRIT_BONF = inverseNormalCDF(1 - ALPHA_PER_STREAM / 2);
 
   let streamsFlaggedSerial = 0;
@@ -467,7 +291,7 @@ async function main(): Promise<void> {
   const seedMap = buildSeedMap(ds.bets, ds.seeds);
   const casinoSeeds = [...seedMap.entries()];
 
-  let chi2Fails = 0, flaggedSeeds = 0;
+  let chi2Fails = 0, flaggedSeeds = 0, testCFlags = 0;
   const perSeedResults: any[] = [];
 
   for (let si = 0; si < casinoSeeds.length; si++) {
@@ -478,9 +302,15 @@ async function main(): Promise<void> {
     let earlyReturned = 0, extendedReturned = 0;
     const earlyReturns: number[] = [];
     const extendedReturns: number[] = [];
+    // Test C (src/cherry-pick.ts): every hand's gross return in half-stakes, and the first-card census.
+    const halfReturns = new Int32Array(PASS2_NONCES);
+    const firstCardRanks: Record<string, number> = Object.fromEntries(FIRST_CARD_RANKS.map(r => [r, 0]));
+    const capturedNonces = ds.bets.filter(b => b.server_seed_hashed === hash).map(b => b.nonce).sort((a, b) => a - b);
 
     for (let n = 0; n < PASS2_NONCES; n++) {
       const result = simulateHand(keyBuffer, clientSeed, n);
+      halfReturns[n] = Math.round(2 * result.playerReturn);
+      firstCardRanks[getCardWithKey(keyBuffer, clientSeed, n, 0).slice(0, -1)]++;
       if (n < EARLY_WINDOW) {
         earlyReturned += result.playerReturn;
         earlyReturns.push(result.playerReturn);
@@ -510,14 +340,27 @@ async function main(): Promise<void> {
     const se = Math.sqrt(extVar * (1 / EARLY_WINDOW + 1 / extN));
     const z = se > 0 ? (earlyAvgReturn - extMean) / se : 0;
     const p = 2 * (1 - normalCDF(Math.abs(z)));
-    const flagged = p < 0.05;
+    const flagged = p < CHERRY_ALPHA;
     if (flagged) flaggedSeeds++;
+    const windows = windowSums(halfReturns, capturedNonces);
+    const c = testC(windows);
+    if (c.flag) testCFlags++;
 
     perSeedResults.push({
       hash: hash.substring(0, 16),
       earlyAvgReturn,
       extendedAvgReturn,
       flagged,
+      // The two quantities the flag decision needs and the artifact did not ship, so verify Step 18
+      // can re-derive every seed's decision from the row (profile BLACKJACK-21).
+      extendedVar: extVar,
+      z,
+      // Test C (profile BLACKJACK-21): the served window (the captured nonces) then the 199 null
+      // windows, as integer half-stake sums; the pre-registered decision; the first-card census.
+      windowReturnHalf: windows,
+      testC_rank: c.rank,
+      testC_flag: c.flag,
+      firstCardRanks,
     });
 
     if (si % 20 === 0) progressBar(si, casinoSeeds.length, 'Pass 2', startP2);
@@ -527,30 +370,22 @@ async function main(): Promise<void> {
   console.log('');
 
   // Binomial test on flag count
-  const expectedFlags = casinoSeeds.length * 0.05;
-  function binomialP(n: number, k: number, p: number): number {
-    let sum = 0;
-    for (let i = k; i <= n; i++) {
-      let logProb = 0;
-      for (let j = 0; j < i; j++) logProb += Math.log(p);
-      for (let j = 0; j < n - i; j++) logProb += Math.log(1 - p);
-      for (let j = 1; j <= i; j++) logProb += Math.log(n - j + 1) - Math.log(j);
-      sum += Math.exp(logProb);
-    }
-    return sum;
-  }
-  const binomP = binomialP(casinoSeeds.length, flaggedSeeds, 0.05);
+  const expectedFlags = casinoSeeds.length * CHERRY_ALPHA;
+  const binomP = binomialP(casinoSeeds.length, flaggedSeeds, CHERRY_ALPHA);
 
   console.log(`  Pass 2 complete: ${casinoSeeds.length} seeds × ${PASS2_NONCES.toLocaleString()} nonces in ${((Date.now()-startP2)/1000).toFixed(1)}s`);
   console.log(`  Flagged: ${flaggedSeeds} (expected ~${expectedFlags.toFixed(1)})`);
-  console.log(`  Binomial p: ${binomP.toFixed(6)}\n`);
+  console.log(`  Binomial p: ${binomP.toFixed(6)}`);
+  console.log(`  Test C (served window vs its own 199-window null, one-sided): ${testCFlags} flagged (FAIL above ${flagBound(casinoSeeds.length, TEST_C_NULL_P).toFixed(2)})\n`);
 
   // ── Write results ──────────────────────────────────────────────────────────
 
   if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 
+  // NO RUN METADATA (profile rules.reproduction): the artifact carries only what the run computed,
+  // so a regeneration on the pinned SIM_SEEDS reproduces its bytes. (It carried `generatedAt` until
+  // 2026-09-24.)
   const simResults = {
-    generatedAt: new Date().toISOString(),
     rules: {
       soft17: SOFT17_RULE,
       doubleAfterSplit: DAS_ALLOWED,
@@ -564,8 +399,10 @@ async function main(): Promise<void> {
       playerBJFreq: optimal.playerBJFreq,
       dealerBJFreq: optimal.dealerBJFreq,
       source: 'src/optimal-play.ts (independent recursive infinite-deck EV solver)',
-      wooReference: 0.994296,
-      wooDelta: optimal.rtp - 0.994296,
+      // LEGACY FIELD NAMES, kept so the pinned artifact regenerates byte for byte: `wooReference` is
+      // NOT a Wizard of Odds figure (retired 2026-09-25, src/config.ts) and nothing scores it.
+      wooReference: RETIRED_FIGURE_FORMERLY_CALLED_WOO,
+      wooDelta: optimal.rtp - RETIRED_FIGURE_FORMERLY_CALLED_WOO,
     },
     pass1: {
       totalRounds: PASS1_ROUNDS_TOTAL,
@@ -601,50 +438,34 @@ async function main(): Promise<void> {
       noncesPerSeed: PASS2_NONCES,
       flaggedSeeds,
       cherryPickBinomial: binomP,
+      testC: {
+        windowSize: TEST_C_WINDOW,
+        windowsPerSeed: TEST_C_WINDOWS,
+        alpha: TEST_C_ALPHA,
+        flagRank: TEST_C_FLAG_RANK,
+        nullFlagProbability: TEST_C_NULL_P,
+        flags: testCFlags,
+        failAbove: flagBound(casinoSeeds.length, TEST_C_NULL_P),
+      },
       perSeed: perSeedResults,
     },
   };
 
   fs.writeFileSync(path.join(OUT_DIR, 'simulation-results.json'), JSON.stringify(simResults, null, 2));
-  console.log('  Written: outputs/simulation-results.json');
+  console.log(`  Written: ${OUT_LABEL}/simulation-results.json`);
 
   // ── RTP Convergence Chart ──────────────────────────────────────────────────
 
-  const chartLabels = convergenceData.map(d => d.rounds >= 1e6 ? (d.rounds / 1e6) + 'M' : d.rounds >= 1e3 ? (d.rounds / 1e3) + 'K' : String(d.rounds));
-  const chartData = convergenceData.map(d => d.rtp * 100);
-
-  const chartHtml = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>DUEL BLACKJACK — ${(PASS1_ROUNDS_TOTAL / 1e6).toFixed(0)}M SIMULATED HANDS</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 24px; }
-  .container { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 32px; }
-  h1 { text-align: center; font-size: 16px; font-weight: 600; color: #333; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
-  .chart-wrap { position: relative; height: 420px; margin-bottom: 24px; }
-  .box { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin: 16px auto; max-width: 900px; text-align: center; }
-</style>
-</head><body>
-<div class="container">
-<h1>DUEL BLACKJACK — RTP CONVERGENCE</h1>
-<p style="text-align:center;font-size:12px;color:#999;margin-bottom:16px">${PASS1_STREAMS} streams x ${(PASS1_ROUNDS_EACH/1e6).toFixed(0)}M = ${(PASS1_ROUNDS_TOTAL/1e6).toFixed(0)}M hands | Fisher's method | S17 + DAS basic strategy</p>
-<div class="chart-wrap"><canvas id="chart"></canvas></div>
-<div class="box">
-  Simulated RTP: <strong>${(simRTP * 100).toFixed(4)}%</strong> | Optimal-play RTP (engine): <strong>${optimalRTPpct.toFixed(4)}%</strong> | Fisher's p: <strong>${fisherP.toFixed(6)}</strong> (T=${fisherStat.toFixed(2)}, df=${fisherDf}) | Serial fails: ${serialFails}
-</div>
-</div>
-<script>
-new Chart(document.getElementById('chart'),{type:'line',data:{
-labels:${JSON.stringify(chartLabels)},
-datasets:[{label:'Cumulative simulated RTP',data:${JSON.stringify(chartData)},borderColor:'#1565c0',tension:0.3,pointRadius:4},
-{label:'Optimal-play RTP (engine, ${optimalRTPpct.toFixed(2)}%)',data:${JSON.stringify(chartLabels.map(() => optimalRTPpct))},borderColor:'#e57373',borderDash:[5,5],pointRadius:0}]},
-options:{responsive:true,maintainAspectRatio:false,
-scales:{y:{ticks:{color:'#666',callback:v=>v+'%'},grid:{color:'#e0e0e0'}},x:{ticks:{color:'#666'},grid:{color:'#e0e0e0'}}},
-plugins:{legend:{labels:{color:'#333'}}}}});
-</script></div></body></html>`;
+  const chartHtml = renderConvergenceHtml({
+    streams: PASS1_STREAMS, roundsPerStream: PASS1_ROUNDS_EACH, totalRounds: PASS1_ROUNDS_TOTAL,
+    convergence: convergenceData, simulatedRTP: simRTP, engineRTP: optimal.rtp,
+    fisherP, fisherT: fisherStat, fisherDf, serialFails,
+  });
 
   fs.writeFileSync(path.join(OUT_DIR, 'rtp-convergence.html'), chartHtml);
-  console.log('  Written: outputs/rtp-convergence.html');
+  console.log(`  Written: ${OUT_LABEL}/rtp-convergence.html`);
+  if (PF_EMIT) console.log('  REPORT GENERATION (PF_EMIT=1): the pinned artifacts in outputs/ were rewritten — re-pin them in src/artifact-pins.ts.');
+  else console.log('  Committed artifacts NOT modified.');
 
   console.log('\n' + '═'.repeat(60));
   console.log('  DONE');

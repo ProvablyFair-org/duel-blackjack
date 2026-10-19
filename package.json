@@ -1,11 +1,20 @@
 {
   "name": "duel-blackjack-audit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ProvablyFair.org technical audit of Duel.com Blackjack",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "test": "mocha && npm run verify",
     "verify": "ts-node tests/verify.ts",
-    "simulate": "ts-node src/simulate.ts"
+    "simulate": "PF_EMIT=1 ts-node src/simulate.ts",
+    "simulate:run": "ts-node src/simulate.ts",
+    "test:full": "npm run simulate:run && mocha && npm run verify",
+    "mutate": "ts-node tests/mutations.ts",
+    "check:site": "node scripts/check-site-verifier.mjs",
+    "release-manifest": "node scripts/release-manifest.mjs",
+    "rtp-claim:write": "ts-node src/rtp-settings.ts"
   },
   "devDependencies": {
     "@types/chai": "^5.x",

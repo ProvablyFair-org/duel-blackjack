@@ -3,9 +3,15 @@ dist/
 outputs/*.json
 !outputs/.gitkeep
 !outputs/rtp-convergence.html
-results/*.json
-!results/.gitkeep
-results/merged/*.json
-!results/merged/.gitkeep
 working-notes/
 .DS_Store
+
+# artifacts of record — the verifier scores a run against these
+!outputs/verification-results.json
+# pinned in src/artifact-pins.ts (verify Step 34); rewritten only by PF_EMIT=1 (`npm run simulate`)
+!outputs/simulation-results.json
+# RTP-CLAIM per-setting table, pinned in src/rtp-settings.ts (Methodology v1.1, D4)
+!outputs/rtp-claim-table.json
+
+# run products — this verifier writes them fresh each run; the committed artifacts are pinned
+outputs/run/

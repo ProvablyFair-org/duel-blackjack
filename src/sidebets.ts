@@ -1,10 +1,13 @@
 /**
  * Side Bet Evaluator — Perfect Pairs + 21+3
  *
- * Classifies card combinations and returns the correct multiplier
- * from the config API. Single canonical implementation.
+ * Classifies card combinations and returns the multiplier from the
+ * config it is given (the declared paytable, src/config.ts
+ * SIDE_BET_CONFIG). Single canonical implementation.
  *
- * Config multipliers (from /api/v2/blackjack/config):
+ * Declared multipliers; they equal the `multipliers` object of
+ * GET /api/v2/blackjack/config as fetched from duel.com on 2026-10-05
+ * in a logged-in session (read-only GET; evidence E18):
  *   Perfect Pairs: perfect_pair=27, colored_pair=11, mixed_pair=7
  *   21+3: suited_trips=121.2307692, straight_flush=53, three_kind=32, straight=12, flush=5
  */

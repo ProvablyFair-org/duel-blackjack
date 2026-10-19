@@ -1,0 +1,18 @@
+{
+  "id": "E15",
+  "url": "https://wizardofodds.com/games/blackjack/player-expected-return/",
+  "retrieved": "2026-09-25",
+  "retrievedBy": "GET, byte for byte as served",
+  "pageLastUpdated": "Aug 03, 2026",
+  "quote": "Based on these rules the house edge is 0.5093975%.",
+  "figureIs": "house edge",
+  "pageAsRetrieved": {
+    "sha256": "52913fc0d694858115124ea15b7ef3b25e169242faa080c2490049371eb3bf25",
+    "bytes": 208531,
+    "note": "The full page was vendored as evidence/E15-woo-player-expected-return-2026-09-25.html from 2026-09-25 (commit dc0df24) until 2026-09-28, when it was removed: third-party pages are cited, not shipped (Framework 1.0 review, F17). The hash identifies the bytes the quote was read from."
+  },
+  "screenshot": {
+    "file": "evidence/E15-woo-player-expected-return-2026-09-25-crop.png",
+    "what": "the quoted paragraph only, cropped; rendered 2026-09-28 by headless Chromium from the vendored page file with every network request blocked, so the page styles are absent"
+  }
+}

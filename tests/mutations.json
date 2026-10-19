@@ -1,0 +1,949 @@
+[
+  {
+    "name": "M01 a rotation record reveals a forged seed plaintext (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "find": "\"serverSeed\": \"b6f2cbcd411eedbd",
+        "replace": "\"serverSeed\": \"c6f2cbcd411eedbd"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 1,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M02 one published next-seed hash altered (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "j.seeds[5].seed.nextServerSeedHash = '0'.repeat(64);"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 2,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M03 a rotation record's timestamp moved after its epoch's bets (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "find": "2026-04-30T22:05:33.738Z",
+        "replace": "2026-04-30T23:05:33.738Z"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 3,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M04 one capture-retry register row removed — its gap becomes operator-side",
+    "runner": "verify",
+    "file": "src/loader.ts",
+    "find": "  { commitment: 'd1ec528647780f2f', nonce: 2,  phase: 'A', clockGapS: 16, dl: 'DL-1' },\n",
+    "replace": "",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 4,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M04b declared nonce base 1",
+    "runner": "verify",
+    "file": "src/loader.ts",
+    "find": "export const NONCE_BASE = 0;",
+    "replace": "export const NONCE_BASE = 1;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 4,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M05 split order: hand 2's second card declared before hand 1's (was a passing multiset)",
+    "runner": "verify",
+    "file": "src/round.ts",
+    "find": "return { seq: [...head, h1[1], h2[1], ...h1.slice(2), ...h2.slice(2), ...dealerDraws] };",
+    "replace": "return { seq: [...head, h2[1], h1[1], ...h1.slice(2), ...h2.slice(2), ...dealerDraws] };",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 5,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M06 the client seed dropped from the HMAC message",
+    "runner": "verify",
+    "file": "src/rng.ts",
+    "find": "  const message = `${clientSeed}:${nonce}:${cursor}`;\n  const hash = hmacSHA256(serverSeed, message);",
+    "replace": "  const message = `x:${nonce}:${cursor}`;\n  const hash = hmacSHA256(serverSeed, message);",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 6,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M07 one amount_won nudged by one grid unit, 1e-18 (dataset re-pinned) — parseFloat reads the forged string as exactly 0.11",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "const b = j.bets.find(x => x.id === 13419050); b.amount_won = '0.110000000000000001';"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 7,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M07b relabelled result: a winning hand's label rewritten to push (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "const b = j.bets.find(x => x.final.blackjack.player.hands.length === 1 && x.final.blackjack.player.hands[0].result === 'win' && !x.final.blackjack.player.hands[0].has_doubled); b.final.blackjack.player.hands[0].result = 'push';"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 7,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M07c off-grid perturbation: an amount with 19 decimals (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "j.bets[0].final.amount_currency = '0.0100000000000000000';"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 7,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M08 declared Perfect Pairs mixed-pair multiplier 7 -> 8",
+    "runner": "verify",
+    "file": "src/config.ts",
+    "find": "  bj_mixed_pair:   '7',",
+    "replace": "  bj_mixed_pair:   '8',",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 8,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M09 Phase E plan says 201 hands",
+    "runner": "verify",
+    "file": "src/loader.ts",
+    "find": "Object.freeze({ A: 3300, B: 1000, C: 500, D: 500, E: 200, F: 500 });",
+    "replace": "Object.freeze({ A: 3300, B: 1000, C: 500, D: 500, E: 201, F: 500 });",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 9,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M10 served effective_edge compared against 0.2",
+    "runner": "verify",
+    "file": "tests/steps/dataset.ts",
+    "find": "if (Math.abs(b.effective_edge - 0.1) < EDGE_TOL) mainOk++;",
+    "replace": "if (Math.abs(b.effective_edge - 0.2) < EDGE_TOL) mainOk++;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 10,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M11 a served side-bet label is not in the declared table",
+    "runner": "verify",
+    "file": "src/config.ts",
+    "find": "bj_mixed_pair: 'Mixed Pair',",
+    "replace": "bj_mixed_pair: 'Mixed Pairs',",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 11,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M12 declared epoch size 49",
+    "runner": "verify",
+    "file": "src/loader.ts",
+    "find": "export const EXPECTED_EPOCH_SIZE = 50;",
+    "replace": "export const EXPECTED_EPOCH_SIZE = 49;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 12,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M13 shrunken dataset: the last Phase F hand deleted (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "j.bets.splice(j.bets.length - 1, 1);"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 13,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M14 the dataset's served paytable says flush pays 6 (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "find": "\"bj_flush\": 5",
+        "replace": "\"bj_flush\": 6"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 14,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M15 one Phase D hand's client seed swapped to another auditor seed (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "const d = j.bets.filter(x => x.phase === 'D'); d[0].client_seed = d[d.length - 1].client_seed;"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 15,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M16 engine ignores its S17 rule input (always H17)",
+    "runner": "verify",
+    "file": "src/optimal-play.ts",
+    "find": "(state.total === 17 && (!state.soft || s17 === 'stand'));",
+    "replace": "(state.total === 17 && !state.soft);",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 16,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M17 hand-written simulation block: Fisher p rewritten (artifact re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "outputs/simulation-results.json",
+        "json": "j.pass1.fisherCombined.pValue = 0.5;"
+      },
+      {
+        "file": "src/artifact-pins.ts",
+        "repinOf": "outputs/simulation-results.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 17,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M17b a stream's first-card census forged non-uniform, sum kept (artifact re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "outputs/simulation-results.json",
+        "json": "const c = j.pass1.streamResults[0].firstCardRanks; c['A'] += 3000; c['2'] -= 3000;"
+      },
+      {
+        "file": "src/artifact-pins.ts",
+        "repinOf": "outputs/simulation-results.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 17,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M17r one stream's runs-test p moved by 1e-12, just beyond the reproduction bound (artifact re-pinned)",
+    "runner": "verify",
+    "guard": "Step 17 compares each recomputed runsP / Fisher T and p / critical z / RTP to the shipped value at 1e-14 absolute + 1e-12 relative (src/diff.ts numbersAgree, the reproduction rule), not bit equality, so 1-ulp libm drift across platforms passes; a shipped runsP moved by 1e-12 (bound 6.5e-13 at p = 0.638) must still FAIL. The stream's serial flag is unchanged, so only the recomputation can catch it.",
+    "edits": [
+      {
+        "file": "outputs/simulation-results.json",
+        "json": "j.pass1.streamResults[0].runsP += 1e-12;"
+      },
+      {
+        "file": "src/artifact-pins.ts",
+        "repinOf": "outputs/simulation-results.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 17,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M18 one seed's cherry-pick flag flipped (artifact re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "outputs/simulation-results.json",
+        "json": "const r = j.pass2.perSeed.find(x => x.flagged === false); r.flagged = true; j.pass2.flaggedSeeds += 1;"
+      },
+      {
+        "file": "src/artifact-pins.ts",
+        "repinOf": "outputs/simulation-results.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 18,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M19 Step 19 treats a soft-17 stand as a violation (H17 expected)",
+    "runner": "verify",
+    "file": "tests/steps/game-specific.ts",
+    "find": "if (hv.best === 17 && hv.isSoft) soft17Stands++;",
+    "replace": "if (hv.best === 17 && hv.isSoft) { soft17Stands++; valid = false; break; }",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 19,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M20 downgraded 3:2: a natural settles at even money",
+    "runner": "verify",
+    "file": "src/round.ts",
+    "find": "if (playerNatural) return [{ result: 'blackjack', halfStakes: R.naturalHalfStakes }];",
+    "replace": "if (playerNatural) return [{ result: 'blackjack', halfStakes: 4n }];",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 20,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M21 a doubled win settles at the single stake",
+    "runner": "verify",
+    "file": "src/round.ts",
+    "find": "if (d > 21 || t > d) return { result: 'win' as const, halfStakes: 4n * w };",
+    "replace": "if (d > 21 || t > d) return { result: 'win' as const, halfStakes: 4n };",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 21,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M22 split order: hand 2 plays out before hand 1",
+    "runner": "verify",
+    "file": "src/round.ts",
+    "find": "return { seq: [...head, h1[1], h2[1], ...h1.slice(2), ...h2.slice(2), ...dealerDraws] };",
+    "replace": "return { seq: [...head, h1[1], h2[1], ...h2.slice(2), ...h1.slice(2), ...dealerDraws] };",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 22,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M23 split-ace rule inverted (one card each is a violation)",
+    "runner": "verify",
+    "file": "tests/steps/game-specific.ts",
+    "find": "if (allTwoCards) aceSplitOk++; else aceSplitBad++;",
+    "replace": "if (!allTwoCards) aceSplitOk++; else aceSplitBad++;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 23,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M24 a two-card 21 after a split settled as a natural",
+    "runner": "verify",
+    "file": "src/round.ts",
+    "find": "    if (t > 21) return { result: 'bust' as const, halfStakes: 0n };",
+    "replace": "    if (t > 21) return { result: 'bust' as const, halfStakes: 0n };\n    if (split && h.cards.length === 2 && t === 21) return { result: 'win' as const, halfStakes: 5n };",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 24,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M25 insurance expected on a King up-card",
+    "runner": "verify",
+    "file": "tests/steps/game-specific.ts",
+    "find": "const isAce = dealerUp.rank === 'A';",
+    "replace": "const isAce = dealerUp.rank === 'K';",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 25,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M26 one served side-bet payout off by 1e-10 (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "const b = j.bets.find(x => x.deal.blackjack.side_bet_results && x.deal.blackjack.side_bet_results.side_perfect_pairs.amount_won === '0.07'); b.deal.blackjack.side_bet_results.side_perfect_pairs.amount_won = '0.0700000001';"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 26,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M27 a side-bet label changed between deal and final (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "find": "\"label\": \"Mixed Pair\",",
+        "replace": "\"label\": \"Colored Pair\","
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 27,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M28 `double` dropped from the declared action vocabulary",
+    "runner": "verify",
+    "file": "tests/steps/rules.ts",
+    "find": "  'hit', 'stand', 'double', 'split', 'insurance', 'no_insurance',",
+    "replace": "  'hit', 'stand', 'split', 'insurance', 'no_insurance',",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 28,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M29 finite-shoe expectation for repeated initial cards",
+    "runner": "verify",
+    "file": "tests/steps/rules.ts",
+    "find": "const P4 = 1 - (52 * 51 * 50 * 49) / (52 ** 4);",
+    "replace": "const P4 = 0;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 29,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M30 live-sample fit threshold raised above the observed p (INFO, verdict unchanged)",
+    "runner": "verify",
+    "file": "tests/steps/rules.ts",
+    "find": "const FIT_ALPHA = 0.001, FIT_Z = 4;",
+    "replace": "const FIT_ALPHA = 0.9, FIT_Z = 4;",
+    "expect": "PROVABLY FAIR — Full Pass",
+    "expectStep": 30,
+    "expectStatus": "INFO"
+  },
+  {
+    "name": "M31 one side stake doubled (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "j.bets[0].deal.blackjack.side_bet_results.side_21_plus_3.amount_placed = '0.020000000000000000';"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 31,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M32 hidden-state leak: a face-down hole card carries its rank (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "find": "\"rank\": \"\",",
+        "replace": "\"rank\": \"9\","
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 32,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M33 declared Phase E stake $10.50",
+    "runner": "verify",
+    "file": "src/config.ts",
+    "find": "A: '0.01', B: '0.01', C: '0.01', D: '0.01', E: '10', F: '0.01',",
+    "replace": "A: '0.01', B: '0.01', C: '0.01', D: '0.01', E: '10.5', F: '0.01',",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 33,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M34 simulation artifact edited WITHOUT re-pin",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "outputs/simulation-results.json",
+        "json": "j.pass1.simulatedRTP = 0.99;"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 34,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M34b hand-written impossible value: a stream's runs-test p = 1.5 (artifact re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "outputs/simulation-results.json",
+        "json": "j.pass1.streamResults[3].runsP = 1.5;"
+      },
+      {
+        "file": "src/artifact-pins.ts",
+        "repinOf": "outputs/simulation-results.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 34,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M34c the pinned chart loads a CDN script again (artifact re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "outputs/rtp-convergence.html",
+        "find": "</head>",
+        "replace": "<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4\"></script></head>"
+      },
+      {
+        "file": "src/artifact-pins.ts",
+        "repinOf": "outputs/rtp-convergence.html"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 34,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M35 MAX_FAIR one range short of the largest multiple",
+    "runner": "verify",
+    "file": "src/rng.ts",
+    "find": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52);",
+    "replace": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52) - 52;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 35,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M35b MAX_FAIR not a whole number of ranges (modulo bias)",
+    "runner": "verify",
+    "file": "src/rng.ts",
+    "find": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52);",
+    "replace": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52) + 20;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 35,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M36 relabelled action stream: a round's [hit, ..., stand] reordered (dataset re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "data/blackjack-dataset-6000hands.json",
+        "json": "const b = j.bets.find(x => x.actions.join() === 'hit,stand'); b.actions = ['stand', 'hit'];"
+      },
+      {
+        "file": "src/loader.ts",
+        "repinOf": "data/blackjack-dataset-6000hands.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 36,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M36b replay without auto-stand at 21",
+    "runner": "verify",
+    "file": "src/round.ts",
+    "find": "        if (handValue(h.cards).best >= 21) break;         // bust, or auto-stand at 21",
+    "replace": "        if (handValue(h.cards).best > 21) break;",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 36,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M37 declared rule set forbids double after split — contradicted by the 109 captured split rounds with a double",
+    "runner": "verify",
+    "file": "src/config.ts",
+    "find": "  das: true,",
+    "replace": "  das: false,",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 37,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38 docs-site derive.js: split second cards dealt split-hand first (vendored copy re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "verifier-parity/games/blackjack/derive.js",
+        "find": "    const main2 = draw();  // cursor 4 — main hand 2nd card FIRST\n    const split2 = draw(); // cursor 5 — split hand 2nd card",
+        "replace": "    const split2 = draw(); // cursor 4\n    const main2 = draw();  // cursor 5"
+      },
+      {
+        "file": "src/site-verifier.ts",
+        "repinOf": "verifier-parity/games/blackjack/derive.js"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38b docs-site derive.js edited WITHOUT re-pin",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "verifier-parity/games/blackjack/derive.js",
+        "find": "const MAX_FAIR = 4_294_967_248;",
+        "replace": "const MAX_FAIR = 4_294_967_248; "
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38c live-site chunk: the Blackjack draw reads cursor+1 (vendored chunk re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "verifier-parity/live-site/chunks/34934e0e762aa37e.js",
+        "find": "let a=new TextEncoder().encode(`${r}:${n}:${e}`),o=n9(await ie(t,a)),f=!1;",
+        "replace": "let a=new TextEncoder().encode(`${r}:${n}:${e+1}`),o=n9(await ie(t,a)),f=!1;"
+      },
+      {
+        "file": "src/live-site-verifier.ts",
+        "repinOf": "verifier-parity/live-site/chunks/34934e0e762aa37e.js"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38d operator Verify-tab code: the HMAC message reads cursor+1 (vendored file re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js",
+        "find": "`${clientSeed}:${nonce}:${cursor}`",
+        "replace": "`${clientSeed}:${nonce}:${cursor + 1}`"
+      },
+      {
+        "file": "src/operator-verifier.ts",
+        "repinOf": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38e operator Verify-tab code edited WITHOUT re-pin",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js",
+        "find": "// Code written in javascript",
+        "replace": "// Code written in javascript "
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38f operator code rejects nothing (bound 2^32), file re-pinned AND src/rng.ts citation rewritten to match — only the fixed hash vectors can see it",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js",
+        "find": "const max = 52 * Math.floor(0x100000000 / 52); // Bias-free range",
+        "replace": "const max = 0x100000000; // Bias-free range"
+      },
+      {
+        "file": "src/operator-verifier.ts",
+        "repinOf": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js"
+      },
+      {
+        "file": "src/rng.ts",
+        "find": "text: 'const max = 52 * Math.floor(0x100000000 / 52); // Bias-free range'",
+        "replace": "text: 'const max = 0x100000000; // Bias-free range'"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38g operator code reads chunks little-endian, file re-pinned AND citation rewritten to match",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js",
+        "find": "const value = view.getUint32(0); // Read",
+        "replace": "const value = view.getUint32(0, true); // Read"
+      },
+      {
+        "file": "src/operator-verifier.ts",
+        "repinOf": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js"
+      },
+      {
+        "file": "src/rng.ts",
+        "find": "text: 'const value = view.getUint32(0); // Read",
+        "replace": "text: 'const value = view.getUint32(0, true); // Read"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38h src/rng.ts cites the HMAC message at the wrong operator line (83 → 84)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "src/rng.ts",
+        "find": "{ line: 83, text:",
+        "replace": "{ line: 84, text:"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38i operator runner hands the file nonce+1 (runner re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "verifier-parity/operator/run-operator-verifier.cjs",
+        "find": "r.clientSeed, Number(r.nonce))",
+        "replace": "r.clientSeed, Number(r.nonce) + 1)"
+      },
+      {
+        "file": "src/operator-verifier.ts",
+        "repinOf": "verifier-parity/operator/run-operator-verifier.cjs"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M38j (mocha) operator Verify-tab code: the HMAC message reads cursor+1 (re-pinned) — the unit test fails",
+    "runner": "mocha",
+    "edits": [
+      {
+        "file": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js",
+        "find": "`${clientSeed}:${nonce}:${cursor}`",
+        "replace": "`${clientSeed}:${nonce}:${cursor + 1}`"
+      },
+      {
+        "file": "src/operator-verifier.ts",
+        "repinOf": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js"
+      }
+    ],
+    "expect": "the operator code reproduces the served cards in the declared order"
+  },
+  {
+    "name": "M38k the all-8-chunks-rejected branch returns a card instead of throwing (was survivor S01 until the operator source was vendored)",
+    "runner": "verify",
+    "file": "src/rng.ts",
+    "find": "  throw new Error('Failed to generate unbiased card from hash — all 8 chunks rejected');",
+    "replace": "  return CARDS[0];",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 38,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M14b RULES says the dealer hits soft 17 — the pinned simulation was run under S17",
+    "runner": "verify",
+    "file": "src/config.ts",
+    "find": "  dealerSoft17: 'stand',",
+    "replace": "  dealerSoft17: 'hit',",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 14,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M16c engine card weights off by 2e-9 (caught by the exact oracle at 1e-12)",
+    "runner": "verify",
+    "file": "src/optimal-play.ts",
+    "find": "'2': 1/13, '3': 1/13,",
+    "replace": "'2': 1/13 + 2e-9, '3': 1/13 - 2e-9,",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 16,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M16d the Wizard of Odds citation E14 has its quoted figure edited one unit of its last printed digit and re-pinned",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "evidence/E14-woo-expected-return-infinite-deck-2026-09-25.json",
+        "find": "the player's expected value is -0.511734%",
+        "replace": "the player's expected value is -0.511735%"
+      },
+      {
+        "file": "src/config.ts",
+        "repinOf": "evidence/E14-woo-expected-return-infinite-deck-2026-09-25.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 16,
+    "expectStatus": "FAIL",
+    "guard": "Step 16 reads the player EV out of the pinned citation's quote and requires the engine under the page's rules to reproduce it to half a unit of its 6th decimal of a percent (5e-9); the engine gives -0.51173364 %, the forged citation says -0.511735 %."
+  },
+  {
+    "name": "M16e the Wizard of Odds citation E15 is edited and NOT re-pinned",
+    "runner": "verify",
+    "file": "evidence/E15-woo-player-expected-return-2026-09-25.json",
+    "find": "Based on these rules the house edge is 0.5093975%",
+    "replace": "Based on these rules the house edge is 0.5093974%",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 16,
+    "expectStatus": "FAIL",
+    "guard": "Step 16 hashes each citation against its SHA-256 pin in src/config.ts before it reads the figure."
+  },
+  {
+    "name": "M16f the engine stops re-splitting (Duel's rule is untouched, only the external references see it)",
+    "runner": "verify",
+    "file": "src/optimal-play.ts",
+    "find": "if (H === 2 || (rank === 'A' && !REF.resplitAces)) return 2 * postSplitHandEV(rank, dealerUp, s17, das);",
+    "replace": "return 2 * postSplitHandEV(rank, dealerUp, s17, das);",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 16,
+    "expectStatus": "FAIL",
+    "guard": "Without re-splitting the engine gives -0.57038801 % against E14's -0.511734 % and a 0.57038801 % edge against E15's 0.5093975 %; Duel's headline does not move."
+  },
+  {
+    "name": "M16g the engine ignores the peek toggle (always peeks behind a ten) — only the unstated-rule control sees it",
+    "runner": "verify",
+    "file": "src/optimal-play.ts",
+    "find": "peekTen: (o.dealerPeek ?? 'ace-and-ten') === 'ace-and-ten',",
+    "replace": "peekTen: true,",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 16,
+    "expectStatus": "FAIL",
+    "guard": "The 'peek behind an ace only' flip must move the E14 figure outside 5e-9; an engine that ignores the toggle returns the same number, so the page agreement would not discriminate that rule."
+  },
+  {
+    "name": "M18c a flagged seed's Test C served window raised and its rank/flag/summary made consistent (artifact re-pinned)",
+    "runner": "verify",
+    "edits": [
+      {
+        "file": "outputs/simulation-results.json",
+        "json": "const r = j.pass2.perSeed.find(x => x.testC_flag === true); r.windowReturnHalf[0] += 200; r.testC_rank = 199; r.testC_flag = false; j.pass2.testC.flags -= 1;"
+      },
+      {
+        "file": "src/artifact-pins.ts",
+        "repinOf": "outputs/simulation-results.json"
+      }
+    ],
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 18,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "M18d verify takes the served window as nonces 50-99 instead of the capture's own nonces",
+    "runner": "verify",
+    "file": "tests/steps/simulation.ts",
+    "find": "windowSums(half, nonces)",
+    "replace": "windowSums(half, Array.from({ length: 50 }, (_, i) => i + 50))",
+    "expect": "NOT PROVABLY FAIR",
+    "expectStep": 18,
+    "expectStatus": "FAIL"
+  },
+  {
+    "name": "MC3a one setting misses its stated figure: the main bet's row priced 1 % under its exact optimal-play RTP in the RTP table's model",
+    "runner": "test",
+    "regen": [
+      "rtp-table",
+      "record"
+    ],
+    "expect": "RTP FIGURE OVERSTATED",
+    "expectStep": 16,
+    "expectStatus": "FLAG",
+    "expectExit": 5,
+    "file": "src/rtp-settings.ts",
+    "find": "BigInt(n), BigInt(d));",
+    "replace": "BigInt(n) * 99n, BigInt(d) * 100n); // MUTATION: the one setting priced 1 % under its exact value",
+    "guard": "FIXPASS2 class C3(i), 15 Oct 2026: the RTP table has one setting (the main bet under the declared rules), so the one-setting miss is that row: the table's model (src/rtp-settings.ts computeRtpClaim) prices it at 0.99 × the pinned oracle fraction (98.4353 %, 0.995 pp under the stated 99.43 %, beyond the 0.1 pp band). Table and record regenerated in the copy, so the only thing wrong is the miss. Runner test = mocha then verify: no unit test, engine/oracle check or operator-FLAG branch may end the run first; Step 16 carries the RTP half of BLACKJACK-19 and becomes the FLAG. A change to the game itself cannot be used here: every rule that moves the main bet's RTP is witnessed by the captured hands (Steps 14, 17) and Step 16 holds the engine to the pinned oracle within 1e-12, so it ends exit 1 first, correctly."
+  },
+  {
+    "name": "MC3as the same change as MC3a, RTP table NOT regenerated: a stale table is a reproduction failure",
+    "runner": "verify",
+    "expect": "PROVABLY FAIR — Full Pass",
+    "expectExit": 1,
+    "file": "src/rtp-settings.ts",
+    "find": "BigInt(n), BigInt(d));",
+    "replace": "BigInt(n) * 99n, BigInt(d) * 100n); // MUTATION: the one setting priced 1 % under its exact value",
+    "guard": "Ruling 14 Oct 2026 (FIXPASS2): a committed RTP table that does not equal the run or its pin is a reproduction failure, exit 1, miss or no miss. MC3a without regenerating the table must end exit 1, never exit 5: the miss is only reported on a consistent package. The draws pass, so the verdict line still reads Full Pass; the run is refused by its exit, 1 (the rule's line reports the committed table as differing from the run)."
+  },
+  {
+    "name": "MC3b the stated figure raised in the claim source: 99.43 % -> 99.63 %",
+    "runner": "test",
+    "regen": [
+      "rtp-table",
+      "record"
+    ],
+    "expect": "RTP FIGURE OVERSTATED",
+    "expectStep": 16,
+    "expectStatus": "FLAG",
+    "expectExit": 5,
+    "file": "src/rtp-settings.ts",
+    "find": "  kind: 'flat',\n  rtp: '0.9943',",
+    "replace": "  kind: 'flat',\n  rtp: '0.9963', // MUTATION: stated figure raised",
+    "guard": "FIXPASS2 class C3, 14 Oct 2026: (ii) the published figure raised where the claim is stated (src/rtp-settings.ts RTP_CLAIM, Duel's stated 0.57 % edge = 99.43 %) to 99.63 %, 0.2 pp above the main bet's exact optimal-play 99.4296 %: the one setting misses by more than the band, so the run must end RTP FIGURE OVERSTATED, exit 5. Table and record regenerated in the copy. Runner test = mocha then verify: no unit test, engine/oracle check or operator-FLAG branch may end the run first. Covers the claim check added 14 Oct, which had no mutation."
+  },
+  {
+    "name": "MC3bs the same change as MC3b, RTP table NOT regenerated: a stale table is a reproduction failure",
+    "runner": "verify",
+    "expect": "PROVABLY FAIR — Full Pass",
+    "expectExit": 1,
+    "file": "src/rtp-settings.ts",
+    "find": "  kind: 'flat',\n  rtp: '0.9943',",
+    "replace": "  kind: 'flat',\n  rtp: '0.9963', // MUTATION: stated figure raised",
+    "guard": "Ruling 14 Oct 2026 (FIXPASS2): a committed RTP table that does not equal the run or its pin is a reproduction failure, exit 1, miss or no miss. MC3b without regenerating the table must end exit 1 with the table reported as differing, never exit 5: the miss is only reported on a consistent package. The draws pass, so the verdict line still reads Full Pass; the run is refused by its exit, 1 (the rule's line reports the committed table as differing from the run)."
+  }
+]

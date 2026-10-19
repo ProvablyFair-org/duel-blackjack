@@ -1,0 +1,18 @@
+{
+  "id": "E14",
+  "url": "https://wizardofodds.com/games/blackjack/expected-return-infinite-deck/",
+  "retrieved": "2026-09-25",
+  "retrievedBy": "GET, byte for byte as served",
+  "pageLastUpdated": "Aug 03, 2026",
+  "quote": "Based on these rules, the player's expected value is -0.511734%.",
+  "figureIs": "player EV",
+  "pageAsRetrieved": {
+    "sha256": "6c029ae1c0fb8919bf47d6e2493ea9d61f64ef20c76dd19c2aadc7f6a83d3d66",
+    "bytes": 193272,
+    "note": "The full page was vendored as evidence/E14-woo-expected-return-infinite-deck-2026-09-25.html from 2026-09-25 (commit dc0df24) until 2026-09-28, when it was removed: third-party pages are cited, not shipped (Framework 1.0 review, F17). The hash identifies the bytes the quote was read from."
+  },
+  "screenshot": {
+    "file": "evidence/E14-woo-expected-return-infinite-deck-2026-09-25-crop.png",
+    "what": "the quoted paragraph only, cropped; rendered 2026-09-28 by headless Chromium from the vendored page file with every network request blocked, so the page styles are absent"
+  }
+}

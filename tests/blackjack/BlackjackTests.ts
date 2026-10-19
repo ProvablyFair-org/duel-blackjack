@@ -17,24 +17,11 @@ import {
   evaluateSideBets, computePPExpectedValue, compute21Plus3ExpectedValue,
 } from '../../src/sidebets';
 import { BlackjackConfig } from '../../src/types';
+import { SIDE_BET_CONFIG } from '../../src/config';
+import { numbersAgree } from '../../src/diff';
 
-// ── Test Config (from live API /api/v2/blackjack/config) ────────────────────
-const CONFIG: BlackjackConfig = {
-  multipliers: {
-    side_perfect_pairs: {
-      bj_perfect_pair: 27,
-      bj_colored_pair: 11,
-      bj_mixed_pair: 7,
-    },
-    side_21_plus_3: {
-      bj_suited_trips: 121.2307692,
-      bj_straight_flush: 53,
-      bj_three_kind: 32,
-      bj_straight: 12,
-      bj_flush: 5,
-    },
-  },
-};
+// ── Test Config — the declared paytable, single-sourced in src/config.ts (profile BLACKJACK-26) ──
+const CONFIG: BlackjackConfig = SIDE_BET_CONFIG;
 
 // ── Known verified hand from captured dataset (bet 0, nonce 0) ──────────────
 // Hash method: SHA-256(hex_decode(serverSeed)) — hashes raw bytes, not UTF-8 string
@@ -428,5 +415,18 @@ describe('Combined Side Bet Evaluator — end-to-end with config multipliers', (
     expect(result.pp.result).to.equal('mixed_pair');
     expect(result.pp.multiplier).to.equal(7);
     expect(result.t3.result).to.be.null;
+  });
+});
+
+describe('Recomputed-float comparison (src/diff.ts numbersAgree, used by Steps 17–18)', () => {
+  it('1-ulp libm drift agrees; a value moved by 1e-12 or more, or a distinct integer, does not', () => {
+    // The shipped runs-test p of Pass 1 stream 0 (outputs/simulation-results.json).
+    const p = 0.6384420618757378;
+    const ulp = 2 ** (Math.floor(Math.log2(p)) - 52);
+    expect(numbersAgree(p, p + ulp)).to.equal(true);
+    expect(numbersAgree(p, p - ulp)).to.equal(true);
+    expect(numbersAgree(p, p + 1e-12)).to.equal(false);
+    expect(numbersAgree(0.001, 0.0010000001)).to.equal(false);
+    expect(numbersAgree(3, 4)).to.equal(false);
   });
 });

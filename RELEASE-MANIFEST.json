@@ -1,0 +1,62 @@
+{
+  "auditId": "PF-2026-DL09",
+  "game": "blackjack",
+  "casino": "duel",
+  "release": "v1.1.0",
+  "framework": "1.1",
+  "simulation": {
+    "seeding": "pinned",
+    "seedSource": "src/simulate.ts SIM_SEEDS (plan constants in src/sim-plan.ts)",
+    "attestation": "Pass 1 (10 streams x 1,000,000 hands) and Pass 2 (120 casino seeds x 10,000 nonces) regenerate from pinned seeds; npm test re-hashes the pinned simulation artifacts (Step 34) and replays Pass 2 Test C in verify (Step 18); npm run test:full regenerates the simulation into outputs/run/ and field-diffs it against the committed copy at the reproduction tolerance"
+  },
+  "runtime": {
+    "command": "npm test",
+    "measured": [
+      {
+        "date": "2026-09-28",
+        "machine": "Apple M2 Max",
+        "cores": 12,
+        "node": "22.23.1",
+        "wallSeconds": 102,
+        "by": "time npm test (machine shared with other runs)"
+      }
+    ]
+  },
+  "datasetSha256": "55d4b4b1850856c8a3ecf6e59021f1f80bb3d8053376c42929e58b6733b8cae4",
+  "artifacts": {
+    "data/blackjack-dataset-6000hands.json": "55d4b4b1850856c8a3ecf6e59021f1f80bb3d8053376c42929e58b6733b8cae4",
+    "outputs/simulation-results.json": "d1e4e4cf8836f3369fef73bc61530f0539b8cf2e061b102600f636c4d414301c",
+    "outputs/rtp-convergence.html": "ae2618ec3e77e55f82ad49979672df9ebcf810a2287e3bed84a5aa0dc0842d23",
+    "outputs/verification-results.json": "c4a2ffa9c2714975bf51dc5ebdd0a38906b4a0ab117d9b24368676fdea6a11cb",
+    "outputs/rtp-claim-table.json": "18ac6e4eea89ec13311c71cdf7c5b71188afa7d537b287eacf58948f1f75996b"
+  },
+  "verdict": "PROVABLY FAIR — Full Pass",
+  "scored": {
+    "passed": 36,
+    "flags": 2,
+    "operatorFlags": 0,
+    "captureFlags": 2,
+    "hardFail": 0,
+    "of": 38
+  },
+  "capturedAt": {
+    "from": "2026-04-30T21:31:22.265Z",
+    "to": "2026-05-01T13:16:57.939Z"
+  },
+  "environment": {
+    "host": "duel.com",
+    "stage": "production",
+    "qualifier": null
+  },
+  "supersedes": "v1.0.1",
+  "signature": "SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY",
+  "falsifiability": {
+    "registry": "tests/mutations.json",
+    "runner": "tests/mutations.ts",
+    "mutations": 69,
+    "killed": 69,
+    "declaredSurvivors": 1,
+    "source": "npm run mutate 2026-10-14 evening (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the whole registry as it then stood (67 entries): 67/67 must-fail mutations caught by their NAMED step, 0 missed, 38/38 scored steps covered, S02 declared survivor; MC3a and MC3as added 2026-10-15 and run with every Step 16 entry (npm run mutate -- M16 MC3): 10/10 caught, MC3a/MC3b exit 5; 69 = 67 + 2, not one run"
+  },
+  "pending": ""
+}
