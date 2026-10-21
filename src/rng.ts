@@ -1,230 +1,204 @@
 /**
- * Duel.com Blackjack RNG — HMAC-SHA256 card generation
+ * PROVENANCE (header added on integration, 20 Oct 2026; everything below this comment is the
+ * clean-room module byte for byte).
  *
- * Single canonical implementation. Imported by verify.ts, simulate.ts, and tests.
- * NEVER re-implement card generation elsewhere.
+ * This module was REBUILT FROM A WRITTEN SPECIFICATION, not ported from Duel's code:
+ *   spec      docs/ALGORITHM.md, a copy of games/blackjack/ALGORITHM.md in the ProvablyFair.org audit
+ *             framework (pf-audit, not yet committed there on 20 Oct 2026; SHA-256 ac7a8517…bb535). Written
+ *             from Duel's public pages, the standard provably-fair construction and the 6,000 live
+ *             rounds, without opening Duel's code (its §8 lists every file read).
+ *   rebuild   written by an implementer who read ONLY that spec and a module-interface file, and
+ *             never opened Duel's code, its Verify-tab file, or this package's earlier src/rng.ts.
+ *   self-test tests/blackjack/RngSpecTests.ts (the spec's §5 vectors and properties).
  *
- * PORTED FROM THE OPERATOR'S OWN SOURCE: the Blackjack code panel of duel.com → Provably Fair →
- * Verify, copied verbatim by Paulo on 2026-09-25 to
- * evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js (SHA-256 1dabca2a…fe16b2, pinned in
- * src/operator-verifier.ts). "Lxx" below is a line of that file. Every citation is listed in
- * OPERATOR_SOURCE_CITES and checked against the pinned bytes by Step 38 and the unit tests — a cited
- * line that does not carry the quoted text FAILs. Step 38 also EXECUTES that file on every captured
- * round and requires it to equal this module on all 50 cursors.
+ * Duel's published Verify-tab code (evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js, E17)
+ * is NOT the source of this module. It is run byte for byte as a SECOND CHECK, by Step 38 and the
+ * unit tests (src/operator-verifier.ts), next to the ProvablyFair.org docs-site and live-site verifiers.
  *
- * Algorithm:
- *   1. hash = HMAC-SHA256(hex_decode(serverSeed), `${clientSeed}:${nonce}:${cursor}`)   L83, L40, L46
- *   2. Read 4-byte chunks as big-endian uint32, chunk start i = 0, 4, … 28          L61, L67
- *   3. Rejection sampling: skip if value >= 52 * floor(2^32 / 52)                    L68, L69
- *   4. Card index = value % 52                                                       L70
- *   5. Card = CARDS[index] (2D … AC, rank ascending, D H S C within a rank)          L71, L12–L17
- *   6. Every chunk rejected → throw                                                  L75
- *
- * 50 cards pre-generated per hand (cursor 0-49).                                     L97
- * Infinite deck — each card drawn independently at 1/52.
- *
- * NOT in the operator file: the commitment encoding (hashServerSeed below — SHA-256 of the
- * hex-decoded seed). It is established from the capture (Step 1: every revealed seed hashes to its
- * commitment), not from operator source.
+ * Three-way agreement measured on integration (20 Oct 2026, the 6,000-round capture, rounds replayed
+ * from their recorded actions): this module vs the live rounds, every served card 33,194/33,194
+ * (6,000/6,000 rounds, splits included), hand values 6,269/6,269, commitments 6,000/6,000; vs Duel's
+ * Verify-tab code 300,000/300,000 cursors (0-49 of every round) and 7/7 fixed hashes (rejection and
+ * all-rejected throw); vs the provablyfair.org live verifier 144,000/144,000 cursors (0-23).
+ * Step 38 re-measures the last two on every run.
  */
+// Clean-room card derivation for Duel.com Blackjack, written from ALGORITHM.md
+// (the spec) and INTERFACE.md (the export list) only.
+import { createHash, createHmac } from 'crypto';
 
-import * as crypto from 'crypto';
-import { Card } from './types';
+export interface Card { rank: string; suit: string }
 
-// ── Operator source citations (checked, not decorative) ────────────────────
-/**
- * Each entry: a line of evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js and text that
- * line must contain verbatim. src/operator-verifier.ts checkOperatorCites reads the pinned file and
- * FAILs any entry whose line does not carry its text.
- */
-export const OPERATOR_SOURCE_CITES: ReadonlyArray<{ line: number; text: string; ports: string }> = Object.freeze([
-  { line: 12, text: "'2D', '2H', '2S', '2C', '3D', '3H', '3S', '3C', '4D', '4H',", ports: 'CARDS order (first row)' },
-  { line: 17, text: "'AH', 'AS', 'AC',", ports: 'CARDS order (last row)' },
-  { line: 40, text: 'const keyBytes = hexToBytes(keyHex);', ports: 'hmacSHA256: the server seed is hex-decoded to the HMAC key' },
-  { line: 46, text: "{ name: 'HMAC', hash: 'SHA-256' },", ports: 'hmacSHA256: HMAC-SHA256' },
-  { line: 61, text: 'for (let i = 0; i <= hashBytes.length - 4; i += 4) {', ports: 'generateCardFromHash: 4-byte chunks, i = 0 … 28' },
-  { line: 67, text: 'const value = view.getUint32(0); // Read 4 bytes as big-endian unsigned integer', ports: 'readUInt32BE: big-endian uint32' },
-  { line: 68, text: 'const max = 52 * Math.floor(0x100000000 / 52); // Bias-free range', ports: 'MAX_FAIR' },
-  { line: 69, text: 'if (value < max) {', ports: 'accept below MAX_FAIR, reject at or above' },
-  { line: 70, text: 'const index = value % 52; // Fair card index', ports: 'CARDS[value % 52]' },
-  { line: 75, text: "throw new Error('Failed to generate unbiased card value from hash');", ports: 'every chunk rejected → throw' },
-  { line: 83, text: '`${clientSeed}:${nonce}:${cursor}`', ports: 'getCard: the HMAC message' },
-  { line: 97, text: 'for (let cursor = 0; cursor < 50; cursor++) {', ports: 'getDeck: 50 cursors, 0 … 49' },
-]);
+// §2 Step 3: ranks in ascending order, suits in the order D, H, S, C.
+const RANKS: readonly string[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+const SUITS: readonly string[] = ['D', 'H', 'S', 'C'];
 
-// ── Card Array (52 cards, index 0-51) ───────────────────────────────────────
-// Order: rank ascending (2→A), within rank: D, H, S, C — operator L11–L18 (equality with the operator
-// file's own CARDS table is checked by Step 38)
-export const CARDS: string[] = [
-  '2D','2H','2S','2C', '3D','3H','3S','3C', '4D','4H','4S','4C',
-  '5D','5H','5S','5C', '6D','6H','6S','6C', '7D','7H','7S','7C',
-  '8D','8H','8S','8C', '9D','9H','9S','9C', '10D','10H','10S','10C',
-  'JD','JH','JS','JC', 'QD','QH','QS','QC', 'KD','KH','KS','KC',
-  'AD','AH','AS','AC',
-];
+// §2 Step 3: index i is rank RANKS[i div 4] of suit SUITS[i mod 4] (rank-major).
+export const CARDS: string[] = Array.from({ length: 52 }, (_, i) => RANKS[Math.floor(i / 4)] + SUITS[i % 4]);
 
-// Bias-free maximum: largest multiple of 52 that fits in uint32 — operator L68
-export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52); // 4,294,967,248
-export const DECK_RANGE = 52;
-export const CHUNKS_PER_HASH = 8;
+// §2 Step 2: a draw is a value in 0..51.
+export const DECK_RANGE: number = 52;
 
-// ── Core Functions ──────────────────────────────────────────────────────────
+// §2 Step 2: largest multiple of 52 that fits in 2^32; values at or above it are rejected.
+export const MAX_FAIR: number = Math.floor(2 ** 32 / DECK_RANGE) * DECK_RANGE; // 4294967248
 
-/** HMAC-SHA256 with hex-decoded key (sync, for speed) */
-export function hmacSHA256(serverSeedHex: string, message: string): Buffer {
-  const key = Buffer.from(serverSeedHex, 'hex');
-  return crypto.createHmac('sha256', key).update(message).digest();
-}
+// §2 Step 2: the rejection loop walks byte offsets 0, 4, ..., 28 of the 32-byte digest.
+export const CHUNKS_PER_HASH: number = 8;
 
-/** HMAC-SHA256 with pre-allocated key buffer (simulation hot path) */
-export function hmacSHA256WithKey(keyBuffer: Buffer, message: string): Buffer {
-  return crypto.createHmac('sha256', keyBuffer).update(message).digest();
-}
-
-/** Generate a single card from an HMAC hash via rejection sampling */
-export function generateCardFromHash(hash: Buffer): string {
-  for (let i = 0; i <= hash.length - 4; i += 4) {   // operator L61
-    const value = hash.readUInt32BE(i);             // operator L67 (getUint32 without littleEndian = big-endian)
-    if (value < MAX_FAIR) {                         // operator L69
-      return CARDS[value % 52];                     // operator L70–L71
-    }
-  }                                                 // all rejected → operator L75 throws
-  throw new Error('Failed to generate unbiased card from hash — all 8 chunks rejected');
-}
-
-/** Get the card index (0-51) from a hash — used for chi-squared testing */
-export function generateCardIndexFromHash(hash: Buffer): number {
-  for (let i = 0; i <= hash.length - 4; i += 4) {
-    const value = hash.readUInt32BE(i);
-    if (value < MAX_FAIR) {
-      return value % 52;
-    }
-  }
-  throw new Error('Failed to generate unbiased card index from hash');
-}
-
-/**
- * The same draw, reporting how many 4-byte chunks were REJECTED before a card was accepted (0 on
- * almost every draw — P(reject) = (2^32 − MAX_FAIR)/2^32 = 48/2^32 per chunk). Used by Step 35 to
- * print the rejection census over every captured draw (profile BLACKJACK-08). Same loop as
- * generateCardFromHash; returns card null when all chunks reject (the canonical path throws).
- */
-export function drawWithCensus(hash: Buffer): { card: string | null; rejected: number } {
-  let rejected = 0;
-  for (let i = 0; i <= hash.length - 4; i += 4) {
-    const value = hash.readUInt32BE(i);
-    if (value < MAX_FAIR) return { card: CARDS[value % 52], rejected };
-    rejected++;
-  }
-  return { card: null, rejected };
-}
-
-/**
- * Get a single card at a specific cursor position.
- * This is the canonical card generation function.
- */
-export function getCard(serverSeed: string, clientSeed: string, nonce: number, cursor: number): string {
-  // operator L83 (the message), L40 and L43–L52 (HMAC-SHA-256 keyed with the hex-decoded seed)
-  const message = `${clientSeed}:${nonce}:${cursor}`;
-  const hash = hmacSHA256(serverSeed, message);
-  return generateCardFromHash(hash);
-}
-
-/**
- * Get a card using a pre-allocated key buffer (simulation hot path).
- */
-export function getCardWithKey(keyBuffer: Buffer, clientSeed: string, nonce: number, cursor: number): string {
-  const message = `${clientSeed}:${nonce}:${cursor}`;
-  const hash = hmacSHA256WithKey(keyBuffer, message);
-  return generateCardFromHash(hash);
-}
-
-/**
- * Generate the full 50-card deck for a hand.
- */
-export function getDeck(serverSeed: string, clientSeed: string, nonce: number, count: number = 50): string[] {
-  const cards: string[] = [];
-  for (let cursor = 0; cursor < count; cursor++) {   // operator L97 (count 50)
-    cards.push(getCard(serverSeed, clientSeed, nonce, cursor));
-  }
-  return cards;
-}
-
-/** SHA-256 hash of server seed (for commitment verification) */
-/** Duel Blackjack uses SHA-256 of hex-decoded bytes, not UTF-8 string */
-export function hashServerSeed(serverSeed: string): string {
-  return crypto.createHash('sha256').update(Buffer.from(serverSeed, 'hex')).digest('hex');
-}
-
-// ── Card Utility Functions ──────────────────────────────────────────────────
-
-/** Extract rank from card string: "10S" → "10", "AH" → "A" */
-export function cardRank(card: string): string {
-  return card.slice(0, -1);
-}
-
-/** Extract suit from card string: "10S" → "S", "AH" → "H" */
-export function cardSuit(card: string): string {
-  return card.slice(-1);
-}
-
-/** Card color: D/H = red, S/C = black */
-export function cardColor(card: string): 'red' | 'black' {
-  const suit = cardSuit(card);
-  return (suit === 'D' || suit === 'H') ? 'red' : 'black';
-}
-
-/** Numeric value of a card rank: A=11, face=10, number=number */
-export function rankValue(rank: string): number {
-  if (rank === 'A') return 11;
-  if (['K', 'Q', 'J'].includes(rank)) return 10;
-  return parseInt(rank);
-}
-
-/** Parse a card string to a Card object */
-export function parseCard(card: string): Card {
-  return { rank: cardRank(card), suit: cardSuit(card) };
-}
-
-/** Compute hand value with ace reduction */
-export function handValue(cards: string[]): { hard: number; soft: number; best: number; isSoft: boolean } {
-  let total = 0;
-  let aces = 0;
-  for (const card of cards) {
-    const rank = cardRank(card);
-    if (rank === 'A') { aces++; total += 1; }
-    else total += rankValue(rank);
-  }
-  const hard = total;
-  let soft = total;
-  if (aces > 0 && total + 10 <= 21) soft = total + 10;
-  const best = soft <= 21 ? soft : hard;
-  return { hard, soft, best, isSoft: soft !== hard && soft <= 21 };
-}
-
-/** Is this a natural blackjack (two-card 21)? */
-export function isBlackjack(cards: string[]): boolean {
-  if (cards.length !== 2) return false;
-  return handValue(cards).best === 21;
-}
-
-/** Is this hand busted? */
-export function isBust(cards: string[]): boolean {
-  return handValue(cards).best > 21;
-}
-
-/**
- * Deal order mapping (confirmed from dataset — alternating P/D):
- *   cursor 0 → Player card 1
- *   cursor 1 → Dealer upcard
- *   cursor 2 → Player card 2
- *   cursor 3 → Dealer hole card
- *   cursor 4+ → hits, splits, doubles in sequence
- */
-export const DEAL_ORDER = {
+// §2 Step 4: cursor k of each card in the initial deal; later cards start at 4.
+export const DEAL_ORDER = Object.freeze({
   PLAYER_1: 0,
   DEALER_UP: 1,
   PLAYER_2: 2,
   DEALER_HOLE: 3,
   FIRST_ACTION: 4,
-} as const;
+} as const);
+
+// §1.1: the server seed is 64 hex characters (32 bytes). Buffer.from(..., 'hex')
+// silently drops anything that is not hex, so the input is checked first.
+function decodeServerSeed(serverSeedHex: string): Buffer {
+  if (typeof serverSeedHex !== 'string' || !/^[0-9a-fA-F]{64}$/.test(serverSeedHex)) {
+    throw new Error('serverSeed must be 64 hexadecimal characters');
+  }
+  return Buffer.from(serverSeedHex, 'hex');
+}
+
+// §2 Step 1: decimal() is plain base 10 with no padding or sign, so only
+// non-negative safe integers are accepted for nonce and cursor.
+function decimal(n: number, name: string): string {
+  if (!Number.isSafeInteger(n) || n < 0) {
+    throw new Error(`${name} must be a non-negative integer`);
+  }
+  return String(n);
+}
+
+// §2 Step 1: message = UTF-8(clientSeed + ":" + nonce + ":" + k).
+function cardMessage(clientSeed: string, nonce: number, cursor: number): string {
+  return `${clientSeed}:${decimal(nonce, 'nonce')}:${decimal(cursor, 'cursor')}`;
+}
+
+// §2 Step 1: HMAC-SHA256 with the hex-decoded server seed as key.
+export function hmacSHA256(serverSeedHex: string, message: string): Buffer {
+  return hmacSHA256WithKey(decodeServerSeed(serverSeedHex), message);
+}
+
+// §2 Step 1 with the 32-byte key already decoded; the message is encoded as UTF-8 (§6 O6).
+export function hmacSHA256WithKey(keyBuffer: Buffer, message: string): Buffer {
+  return createHmac('sha256', keyBuffer).update(Buffer.from(message, 'utf8')).digest();
+}
+
+// §2 Step 2: read 4-byte big-endian chunks at offsets 0, 4, ..., 28; the first
+// chunk below MAX_FAIR gives the index (value mod 52). Reports how many chunks
+// were rejected; index is null when every chunk was rejected (§6 O1).
+function drawIndex(hash: Buffer): { index: number | null; rejected: number } {
+  if (!Buffer.isBuffer(hash) || hash.length < CHUNKS_PER_HASH * 4) {
+    throw new Error(`hash must be a Buffer of at least ${CHUNKS_PER_HASH * 4} bytes`);
+  }
+  let rejected = 0;
+  for (let c = 0; c < CHUNKS_PER_HASH; c++) {
+    const v = hash.readUInt32BE(c * 4);
+    if (v < MAX_FAIR) return { index: v % DECK_RANGE, rejected };
+    rejected++;
+  }
+  return { index: null, rejected };
+}
+
+// §2 Steps 2-3, with the rejection rule; throws if all 8 chunks are rejected (§6 O1 leaves that case open).
+export function generateCardIndexFromHash(hash: Buffer): number {
+  const { index } = drawIndex(hash);
+  if (index === null) throw new Error('no 4-byte chunk of the digest is below MAX_FAIR');
+  return index;
+}
+
+// §2 Steps 2-3: index to card string.
+export function generateCardFromHash(hash: Buffer): string {
+  return CARDS[generateCardIndexFromHash(hash)];
+}
+
+// §2 Step 2: same draw, plus the count of rejected chunks; card null if none accepted.
+export function drawWithCensus(hash: Buffer): { card: string | null; rejected: number } {
+  const { index, rejected } = drawIndex(hash);
+  return { card: index === null ? null : CARDS[index], rejected };
+}
+
+// §2 Steps 1-3: the card at cursor k of round (serverSeed, clientSeed, nonce).
+export function getCard(serverSeed: string, clientSeed: string, nonce: number, cursor: number): string {
+  return getCardWithKey(decodeServerSeed(serverSeed), clientSeed, nonce, cursor);
+}
+
+// §2 Steps 1-3 with the key already decoded.
+export function getCardWithKey(keyBuffer: Buffer, clientSeed: string, nonce: number, cursor: number): string {
+  return generateCardFromHash(hmacSHA256WithKey(keyBuffer, cardMessage(clientSeed, nonce, cursor)));
+}
+
+// §2 Steps 1-4: cards for cursors 0..count-1. The spec gives no default length;
+// 52 is used when count is omitted.
+export function getDeck(serverSeed: string, clientSeed: string, nonce: number, count: number = DECK_RANGE): string[] {
+  if (!Number.isSafeInteger(count) || count < 0) throw new Error('count must be a non-negative integer');
+  const key = decodeServerSeed(serverSeed);
+  const out: string[] = [];
+  for (let k = 0; k < count; k++) out.push(getCardWithKey(key, clientSeed, nonce, k));
+  return out;
+}
+
+// §1.2: commitment = lowercase hex of SHA-256 over the 32 decoded seed bytes (not the ASCII text).
+export function hashServerSeed(serverSeed: string): string {
+  return createHash('sha256').update(decodeServerSeed(serverSeed)).digest('hex');
+}
+
+// ---- Plain card helpers (INTERFACE.md; hand totals per §2 Step 5) ----
+
+export function parseCard(card: string): Card {
+  if (typeof card !== 'string' || card.length < 2) throw new Error(`invalid card: ${String(card)}`);
+  const rank = card.slice(0, -1);
+  const suit = card.slice(-1);
+  if (!RANKS.includes(rank) || !SUITS.includes(suit)) throw new Error(`invalid card: ${card}`);
+  return { rank, suit };
+}
+
+export function cardRank(card: string): string {
+  return parseCard(card).rank;
+}
+
+export function cardSuit(card: string): string {
+  return parseCard(card).suit;
+}
+
+// §3.2 Perfect Pairs colours: diamonds and hearts red, spades and clubs black.
+export function cardColor(card: string): 'red' | 'black' {
+  const s = cardSuit(card);
+  return s === 'D' || s === 'H' ? 'red' : 'black';
+}
+
+// §2 Step 5: 2-10 face value, J/Q/K 10, A 11.
+export function rankValue(rank: string): number {
+  if (rank === 'A') return 11;
+  if (rank === 'J' || rank === 'Q' || rank === 'K') return 10;
+  if (!RANKS.includes(rank)) throw new Error(`invalid rank: ${rank}`);
+  return Number(rank);
+}
+
+// §2 Step 5: count every Ace as 1 for the hard total; a soft total counts one
+// Ace as 11 when that does not exceed 21. This equals the spec's "count A as
+// 11, subtract 10 per Ace while over 21".
+export function handValue(cards: string[]): { hard: number; soft: number; best: number; isSoft: boolean } {
+  let hard = 0;
+  let aces = 0;
+  for (const c of cards) {
+    const r = cardRank(c);
+    if (r === 'A') { aces++; hard += 1; } else { hard += rankValue(r); }
+  }
+  const soft = aces > 0 && hard + 10 <= 21 ? hard + 10 : hard;
+  const best = soft <= 21 ? soft : hard;
+  const isSoft = soft !== hard && best === soft;
+  return { hard, soft, best, isSoft };
+}
+
+// §3.1: a natural is a two-card 21 (the "unsplit hand" condition is the caller's to apply).
+export function isBlackjack(cards: string[]): boolean {
+  return cards.length === 2 && handValue(cards).best === 21;
+}
+
+// §2 Step 5: bust = total over 21 even with every Ace at 1.
+export function isBust(cards: string[]): boolean {
+  return handValue(cards).hard > 21;
+}

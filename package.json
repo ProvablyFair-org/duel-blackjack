@@ -1,6 +1,6 @@
 {
   "name": "duel-blackjack-audit",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "ProvablyFair.org technical audit of Duel.com Blackjack",
   "engines": {
     "node": "22.x"

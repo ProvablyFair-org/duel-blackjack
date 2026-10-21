@@ -27,12 +27,12 @@ const DECLARED = {
   auditId: 'PF-2026-DL09',
   game: 'blackjack',
   casino: 'duel',
-  release: 'v1.1.0',
+  release: 'v1.2.0',
   framework: '1.1',
   environmentHost: 'duel.com',
   environmentStage: 'production',
   environmentQualifier: null,
-  supersedes: 'v1.0.1', // latest tag of ProvablyFair-org/duel-blackjack (gh api repos/ProvablyFair-org/duel-blackjack/tags, 2026-09-28: v1.0.1, v1.0.0)
+  supersedes: 'v1.1.0',
   signature: 'SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY',
   pending: '',
 };
@@ -67,7 +67,7 @@ function captureWindow(dataset) {
 /** The falsifiability battery. `mutations` is computed from the registry; the RUN RESULT is DECLARED
  * from the last completed `npm run mutate` (cite it in `source`) and must be refreshed by re-running
  * the battery — a generator never asserts a kill it did not run. null = not run for this manifest. */
-const FALSIFIABILITY_DECLARED = { killed: 69, declaredSurvivors: 1, source: 'npm run mutate 2026-10-14 evening (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the whole registry as it then stood (67 entries): 67/67 must-fail mutations caught by their NAMED step, 0 missed, 38/38 scored steps covered, S02 declared survivor; MC3a and MC3as added 2026-10-15 and run with every Step 16 entry (npm run mutate -- M16 MC3): 10/10 caught, MC3a/MC3b exit 5; 69 = 67 + 2, not one run' };
+const FALSIFIABILITY_DECLARED = { killed: 68, declaredSurvivors: 1, source: 'npm run mutate 2026-10-20 (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the whole registry (68 entries, after M38h was retired with the citation table): 68/68 must-fail mutations caught by their NAMED step, 0 missed, 38/38 scored steps covered, S02 declared survivor' };
 
 /** How long `npm test` takes, and on what — a property of the machine, so DECLARED from measured runs. */
 const RUNTIME = {

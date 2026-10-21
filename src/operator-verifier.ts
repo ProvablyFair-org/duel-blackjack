@@ -1,10 +1,13 @@
 /**
- * THE OPERATOR'S OWN VERIFIER CODE (profile BLACKJACK-09; Step 38, third leg).
+ * THE OPERATOR'S OWN VERIFIER CODE (profile BLACKJACK-09; Step 38, third leg) — A SECOND CHECK, NOT
+ * THE SOURCE.
  *
  * Duel.com's Provably Fair → Verify page, with Blackjack selected, shows a JavaScript code panel
- * (evidence E04). That code is the operator's published algorithm for Blackjack: the only
- * operator-authored source for the draw this audit has. Until 2026-09-25 src/rng.ts was transcribed
- * from the page and cited nothing a check could hold it to (MANIFEST.md DL-6, premise P2).
+ * (evidence E04). That code is the operator's published algorithm for Blackjack. Since v1.2.0
+ * (20 Oct 2026) src/rng.ts is rebuilt from the written specification docs/ALGORITHM.md by an
+ * implementer who never opened Duel's code; this file runs Duel's published code as a second check
+ * on that rebuild. Through v1.1.0 src/rng.ts was ported from it and cited 12 of its lines; that
+ * citation table is gone with the port.
  *
  * PROVENANCE. Copied by Paulo from duel.com → Provably Fair → Verify (Blackjack), the code panel, on
  * 2026-09-25, and saved verbatim as evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js
@@ -22,8 +25,6 @@
  *      recorder, and the calls to the file's own validateBlackjackResult and
  *      generateInfiniteDeckCard). Not one character of the file is rewritten, even in memory.
  *      The child process is used because the file awaits WebCrypto and the suite is synchronous.
- *   3. CHECKS THE CITATIONS: every line src/rng.ts cites (OPERATOR_SOURCE_CITES) must carry, at that
- *      line number of the pinned file, the text it quotes.
  */
 
 import * as crypto from 'crypto';
@@ -31,7 +32,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { spawnSync } from 'child_process';
-import { OPERATOR_SOURCE_CITES } from './rng';
 
 export const PACKAGE_ROOT = path.join(__dirname, '..');
 export const OPERATOR_VERIFIER_FILE = 'evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js';
@@ -140,20 +140,6 @@ export function runOperatorVerifier(rounds: OperatorRound[], hashes: string[] = 
   } catch (e) {
     return { files, hashesMatch, ...empty, error: `operator verifier output unreadable: ${(e as Error).message}` };
   }
-}
-
-/** Every citation in src/rng.ts must quote, verbatim, the pinned operator file at the line it names. */
-export function checkOperatorCites(root = PACKAGE_ROOT): { checked: number; bad: string[] } {
-  const p = path.join(root, OPERATOR_VERIFIER_FILE);
-  if (!fs.existsSync(p)) return { checked: 0, bad: [`${OPERATOR_VERIFIER_FILE} not found`] };
-  const lines = fs.readFileSync(p, 'utf8').split('\n');
-  const bad: string[] = [];
-  for (const c of OPERATOR_SOURCE_CITES) {
-    const at = lines[c.line - 1];
-    if (at === undefined || !at.includes(c.text)) bad.push(`L${c.line} does not contain ${JSON.stringify(c.text)} (it reads ${JSON.stringify((at ?? '').trim())})`);
-  }
-  if (OPERATOR_SOURCE_CITES.length === 0) bad.push('src/rng.ts cites no operator line');
-  return { checked: OPERATOR_SOURCE_CITES.length, bad };
 }
 
 /**

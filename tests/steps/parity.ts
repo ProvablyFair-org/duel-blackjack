@@ -14,19 +14,20 @@
  *       declared-order card sequence must fit inside those 24 (a round needing more is reported).
  *
  *   (3) OPERATOR — Duel's own Verify-tab code for Blackjack (duel.com → Provably Fair → Verify, copied
- *       verbatim 2026-09-25; src/operator-verifier.ts, profile BLACKJACK-09). Executed unmodified on
+ *       verbatim 2026-09-25; src/operator-verifier.ts, profile BLACKJACK-09), run as a SECOND CHECK:
+ *       src/rng.ts is rebuilt from docs/ALGORITHM.md, not from this code. Executed unmodified on
  *       every round: all 50 cursors its validateBlackjackResult returns must equal src/rng.ts getCard,
  *       and the served cards in the declared order must equal its first cursors. Its CARDS table must
  *       equal src/rng.ts CARDS, its generateInfiniteDeckCard must give the expected card (or throw) on
- *       each fixed hash vector (the rejection branch no captured round reaches), it must print only
- *       its own empty-input message, and every operator line src/rng.ts cites must carry the quoted text.
+ *       each fixed hash vector (the rejection branch no captured round reaches), and it must print only
+ *       its own empty-input message.
  *
  * A vendored file that does not hash to its pin FAILs before anything runs.
  * scripts/check-site-verifier.mjs compares a docs-site checkout (or --live, the live site) with the pins.
  */
 
 import { getCard, CARDS, generateCardFromHash } from '../../src/rng';
-import { runOperatorVerifier, checkOperatorCites, OPERATOR_HASH_VECTORS, OPERATOR_EXPECTED_LOGS,
+import { runOperatorVerifier, OPERATOR_HASH_VECTORS, OPERATOR_EXPECTED_LOGS,
   OPERATOR_VERIFIER_PROVENANCE } from '../../src/operator-verifier';
 import { classifyPerfectPairs, classifyTwentyOnePlus3 } from '../../src/sidebets';
 import { PP_PAYTABLE, T3_PAYTABLE, PP_KEY, T3_KEY } from '../../src/config';
@@ -98,7 +99,6 @@ export function run(ctx: VerifyContext): StepResult[] {
   const op = runOperatorVerifier(rounds, OPERATOR_HASH_VECTORS.map(v => v.hash));
   let opRounds = 0, opRoundsDiffer = 0, opCursors = 0, opCursorsDiffer = 0, opServed = 0, opServedDiffer = 0;
   let vecOk = 0;
-  const cites = checkOperatorCites();
   const logsOk = op.logs.length === OPERATOR_EXPECTED_LOGS.length && op.logs.every((l, i) => l === OPERATOR_EXPECTED_LOGS[i]);
   const tableOk = op.cardsTable.length === CARDS.length && op.cardsTable.every((c, i) => c === CARDS[i]);
   if (!op.cards) problems.push(`operator Verify-tab code: ${op.error}`);
@@ -138,10 +138,9 @@ export function run(ctx: VerifyContext): StepResult[] {
       else if (problems.length < 6) problems.push(`hash vector ${v.id}: operator ${h?.card ?? `threw (${h?.error})`}, src/rng.ts ${mine ?? 'threw'}, expected ${v.card ?? 'throw'}`);
     });
   }
-  if (cites.bad.length) problems.push(`src/rng.ts operator citations: ${cites.bad.slice(0, 2).join('; ')}`);
   const opOk = !!op.cards && op.hashesMatch && logsOk && tableOk && opRounds === EXPECTED_HANDS && opRoundsDiffer === 0
     && opCursors === EXPECTED_HANDS * OP_CURSORS && opCursorsDiffer === 0 && opServedDiffer === 0 && opServed > 0
-    && vecOk === OPERATOR_HASH_VECTORS.length && cites.bad.length === 0 && cites.checked > 0;
+    && vecOk === OPERATOR_HASH_VECTORS.length;
 
   const ok = problems.length === 0 && docsAgree === EXPECTED_HANDS && liveAgree === EXPECTED_HANDS && beyond24 === 0
     && site.hashesMatch && live.hashesMatch && opOk;
@@ -151,15 +150,13 @@ export function run(ctx: VerifyContext): StepResult[] {
     `${docsAgree}/${EXPECTED_HANDS} agree with this package on every hand's cards, outcome, doubled flag and gross return, the dealer hand and both side-bet multipliers (${docsDiffer} differ). ` +
     `Live www.provablyfair.org/verify-bets bundle (3 chunks + runner, pins ${live.hashesMatch ? 'match' : 'DO NOT match'}; ${live.standIns.length} rendering modules stood in, none in the verifier's closure) executed on every round: ` +
     `${liveAgree}/${EXPECTED_HANDS} rounds, the 24 cursors it prints (${liveCursors} cards) equal src/rng.ts and the served cards in the declared order (${liveDiffer} differ; ${beyond24} rounds need more than the 24 cursors the page prints). ` +
-    `Duel's own Verify-tab code (${OPERATOR_VERIFIER_PROVENANCE.savedAs} ${op.files[0]?.actual?.substring(0, 8) ?? 'absent'}…, copied ${OPERATOR_VERIFIER_PROVENANCE.copiedOn}; pins ${op.hashesMatch ? 'match' : 'DO NOT match'}) ` +
+    `Duel's own Verify-tab code, run as a second check (src/rng.ts is rebuilt from docs/ALGORITHM.md, not from it) (${OPERATOR_VERIFIER_PROVENANCE.savedAs} ${op.files[0]?.actual?.substring(0, 8) ?? 'absent'}…, copied ${OPERATOR_VERIFIER_PROVENANCE.copiedOn}; pins ${op.hashesMatch ? 'match' : 'DO NOT match'}) ` +
     (op.cards
       ? `executed unmodified on every round: ${opRounds}/${EXPECTED_HANDS} rounds agree — ${opCursors - opCursorsDiffer}/${EXPECTED_HANDS * OP_CURSORS} cursors equal src/rng.ts (${opCursorsDiffer} differ), ${opServed - opServedDiffer}/${opServed} served cards in the declared order equal its cursors (${opServedDiffer} differ); ` +
-        `CARDS table ${tableOk ? 'equal' : 'DIFFERS'}; fixed hash vectors ${vecOk}/${OPERATOR_HASH_VECTORS.length} (rejection branch, all-rejected throw, big-endian read); `
-      : `NOT executed — 0/${EXPECTED_HANDS} rounds checked; `) +
-    `operator lines cited by src/rng.ts ${cites.checked - cites.bad.length}/${cites.checked} verbatim.` +
+        `CARDS table ${tableOk ? 'equal' : 'DIFFERS'}; fixed hash vectors ${vecOk}/${OPERATOR_HASH_VECTORS.length} (rejection branch, all-rejected throw, big-endian read).`
+      : `NOT executed — 0/${EXPECTED_HANDS} rounds checked.`) +
     (problems.length ? ` Problems: ${problems.join('; ')}` : ''),
     { docsAgree, docsDiffer, liveAgree, liveDiffer, beyond24, liveCursors,
       operatorRoundsAgree: opRounds, operatorRoundsDiffer: opRoundsDiffer, operatorCursors: opCursors, operatorCursorsDiffer: opCursorsDiffer,
-      operatorServedCards: opServed, operatorServedDiffer: opServedDiffer, operatorVectorsOk: vecOk, operatorCitesChecked: cites.checked,
-      operatorCitesBad: cites.bad.length })];
+      operatorServedCards: opServed, operatorServedDiffer: opServedDiffer, operatorVectorsOk: vecOk })];
 }

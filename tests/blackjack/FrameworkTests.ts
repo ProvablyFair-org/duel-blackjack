@@ -135,9 +135,10 @@ describe('Framework — exact-rational oracle (anchor/oracle.py, profile BLACKJA
   });
 });
 
-describe('Framework — the operator\'s own Verify-tab code, executed unmodified (profile BLACKJACK-09)', () => {
-  // duel.com → Provably Fair → Verify (Blackjack) code panel, copied verbatim 2026-09-25 (src/operator-verifier.ts)
-  const { runOperatorVerifier, checkOperatorCites, OPERATOR_HASH_VECTORS, OPERATOR_VERIFIER_PINS, OPERATOR_VERIFIER_FILE } =
+describe('Framework — the operator\'s own Verify-tab code, executed unmodified as a second check (profile BLACKJACK-09)', () => {
+  // duel.com → Provably Fair → Verify (Blackjack) code panel, copied verbatim 2026-09-25 (src/operator-verifier.ts).
+  // src/rng.ts is rebuilt from docs/ALGORITHM.md, not from this code; this block checks the rebuild against it.
+  const { runOperatorVerifier, OPERATOR_HASH_VECTORS, OPERATOR_VERIFIER_PINS, OPERATOR_VERIFIER_FILE } =
     require('../../src/operator-verifier') as typeof import('../../src/operator-verifier');
   const { getCard, getDeck } = require('../../src/rng') as typeof import('../../src/rng');
   const { loadDataset, buildSeedMap, EXPECTED_HANDS } = require('../../src/loader') as typeof import('../../src/loader');
@@ -157,11 +158,6 @@ describe('Framework — the operator\'s own Verify-tab code, executed unmodified
     expect(run.files[0].file).to.equal(OPERATOR_VERIFIER_FILE);
     expect(run.files[0].actual).to.equal(OPERATOR_VERIFIER_PINS[OPERATOR_VERIFIER_FILE]);
     expect(run.error).to.equal(null);
-  });
-  it('every operator line src/rng.ts cites carries the quoted text verbatim', () => {
-    const c = checkOperatorCites();
-    expect(c.bad).to.deep.equal([]);
-    expect(c.checked).to.be.greaterThan(0);
   });
   it('the operator CARDS table is src/rng.ts CARDS', () => {
     expect(run.cardsTable).to.deep.equal(CARDS);

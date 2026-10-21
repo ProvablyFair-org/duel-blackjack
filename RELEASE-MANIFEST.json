@@ -2,7 +2,7 @@
   "auditId": "PF-2026-DL09",
   "game": "blackjack",
   "casino": "duel",
-  "release": "v1.1.0",
+  "release": "v1.2.0",
   "framework": "1.1",
   "simulation": {
     "seeding": "pinned",
@@ -27,7 +27,7 @@
     "data/blackjack-dataset-6000hands.json": "55d4b4b1850856c8a3ecf6e59021f1f80bb3d8053376c42929e58b6733b8cae4",
     "outputs/simulation-results.json": "d1e4e4cf8836f3369fef73bc61530f0539b8cf2e061b102600f636c4d414301c",
     "outputs/rtp-convergence.html": "ae2618ec3e77e55f82ad49979672df9ebcf810a2287e3bed84a5aa0dc0842d23",
-    "outputs/verification-results.json": "c4a2ffa9c2714975bf51dc5ebdd0a38906b4a0ab117d9b24368676fdea6a11cb",
+    "outputs/verification-results.json": "81b384a1b4725a1a4709b6230ae0eea5cff4c2952a41c3be1d5a005288e9881a",
     "outputs/rtp-claim-table.json": "18ac6e4eea89ec13311c71cdf7c5b71188afa7d537b287eacf58948f1f75996b"
   },
   "verdict": "PROVABLY FAIR — Full Pass",
@@ -48,15 +48,15 @@
     "stage": "production",
     "qualifier": null
   },
-  "supersedes": "v1.0.1",
+  "supersedes": "v1.1.0",
   "signature": "SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY",
   "falsifiability": {
     "registry": "tests/mutations.json",
     "runner": "tests/mutations.ts",
-    "mutations": 69,
-    "killed": 69,
+    "mutations": 68,
+    "killed": 68,
     "declaredSurvivors": 1,
-    "source": "npm run mutate 2026-10-14 evening (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the whole registry as it then stood (67 entries): 67/67 must-fail mutations caught by their NAMED step, 0 missed, 38/38 scored steps covered, S02 declared survivor; MC3a and MC3as added 2026-10-15 and run with every Step 16 entry (npm run mutate -- M16 MC3): 10/10 caught, MC3a/MC3b exit 5; 69 = 67 + 2, not one run"
+    "source": "npm run mutate 2026-10-20 (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the whole registry (68 entries, after M38h was retired with the citation table): 68/68 must-fail mutations caught by their NAMED step, 0 missed, 38/38 scored steps covered, S02 declared survivor"
   },
   "pending": ""
 }

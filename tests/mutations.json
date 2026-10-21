@@ -86,8 +86,8 @@
     "name": "M06 the client seed dropped from the HMAC message",
     "runner": "verify",
     "file": "src/rng.ts",
-    "find": "  const message = `${clientSeed}:${nonce}:${cursor}`;\n  const hash = hmacSHA256(serverSeed, message);",
-    "replace": "  const message = `x:${nonce}:${cursor}`;\n  const hash = hmacSHA256(serverSeed, message);",
+    "find": "  return `${clientSeed}:${decimal(nonce, 'nonce')}:${decimal(cursor, 'cursor')}`;",
+    "replace": "  return `x:${decimal(nonce, 'nonce')}:${decimal(cursor, 'cursor')}`;",
     "expect": "NOT PROVABLY FAIR",
     "expectStep": 6,
     "expectStatus": "FAIL"
@@ -556,8 +556,8 @@
     "name": "M35 MAX_FAIR one range short of the largest multiple",
     "runner": "verify",
     "file": "src/rng.ts",
-    "find": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52);",
-    "replace": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52) - 52;",
+    "find": "export const MAX_FAIR: number = Math.floor(2 ** 32 / DECK_RANGE) * DECK_RANGE;",
+    "replace": "export const MAX_FAIR: number = Math.floor(2 ** 32 / DECK_RANGE) * DECK_RANGE - 52;",
     "expect": "NOT PROVABLY FAIR",
     "expectStep": 35,
     "expectStatus": "FAIL"
@@ -566,8 +566,8 @@
     "name": "M35b MAX_FAIR not a whole number of ranges (modulo bias)",
     "runner": "verify",
     "file": "src/rng.ts",
-    "find": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52);",
-    "replace": "export const MAX_FAIR = 52 * Math.floor(0x100000000 / 52) + 20;",
+    "find": "export const MAX_FAIR: number = Math.floor(2 ** 32 / DECK_RANGE) * DECK_RANGE;",
+    "replace": "export const MAX_FAIR: number = Math.floor(2 ** 32 / DECK_RANGE) * DECK_RANGE + 20;",
     "expect": "NOT PROVABLY FAIR",
     "expectStep": 35,
     "expectStatus": "FAIL"
@@ -692,7 +692,7 @@
     "expectStatus": "FAIL"
   },
   {
-    "name": "M38f operator code rejects nothing (bound 2^32), file re-pinned AND src/rng.ts citation rewritten to match — only the fixed hash vectors can see it",
+    "name": "M38f operator code rejects nothing (bound 2^32), file re-pinned — only the fixed hash vectors can see it",
     "runner": "verify",
     "edits": [
       {
@@ -703,11 +703,6 @@
       {
         "file": "src/operator-verifier.ts",
         "repinOf": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js"
-      },
-      {
-        "file": "src/rng.ts",
-        "find": "text: 'const max = 52 * Math.floor(0x100000000 / 52); // Bias-free range'",
-        "replace": "text: 'const max = 0x100000000; // Bias-free range'"
       }
     ],
     "expect": "NOT PROVABLY FAIR",
@@ -715,7 +710,7 @@
     "expectStatus": "FAIL"
   },
   {
-    "name": "M38g operator code reads chunks little-endian, file re-pinned AND citation rewritten to match",
+    "name": "M38g operator code reads chunks little-endian, file re-pinned",
     "runner": "verify",
     "edits": [
       {
@@ -726,25 +721,6 @@
       {
         "file": "src/operator-verifier.ts",
         "repinOf": "evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js"
-      },
-      {
-        "file": "src/rng.ts",
-        "find": "text: 'const value = view.getUint32(0); // Read",
-        "replace": "text: 'const value = view.getUint32(0, true); // Read"
-      }
-    ],
-    "expect": "NOT PROVABLY FAIR",
-    "expectStep": 38,
-    "expectStatus": "FAIL"
-  },
-  {
-    "name": "M38h src/rng.ts cites the HMAC message at the wrong operator line (83 → 84)",
-    "runner": "verify",
-    "edits": [
-      {
-        "file": "src/rng.ts",
-        "find": "{ line: 83, text:",
-        "replace": "{ line: 84, text:"
       }
     ],
     "expect": "NOT PROVABLY FAIR",
@@ -789,8 +765,8 @@
     "name": "M38k the all-8-chunks-rejected branch returns a card instead of throwing (was survivor S01 until the operator source was vendored)",
     "runner": "verify",
     "file": "src/rng.ts",
-    "find": "  throw new Error('Failed to generate unbiased card from hash — all 8 chunks rejected');",
-    "replace": "  return CARDS[0];",
+    "find": "  if (index === null) throw new Error('no 4-byte chunk of the digest is below MAX_FAIR');\n  return index;",
+    "replace": "  if (index === null) return 0;\n  return index;",
     "expect": "NOT PROVABLY FAIR",
     "expectStep": 38,
     "expectStatus": "FAIL"

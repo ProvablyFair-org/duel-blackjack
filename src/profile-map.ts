@@ -208,9 +208,9 @@ export const STEP_CLAIMS: Record<number, StepClaims> = {
     + 'multipliers equal this package\'s on 6,000/6,000. The LIVE www.provablyfair.org/verify-bets bundle (3 chunks + runner, src/live-site-'
     + 'verifier.ts; `check-site-verifier.mjs --live` GET 2026-09-24: 3/3 MATCH) is executed on all 6,000: its 24 printed cursors equal src/rng.ts '
     + 'and the served cards, 6,000/6,000. Duel\'s own Verify-tab code (the page\'s code panel, copied 2026-09-25, pinned, src/operator-verifier.ts) is '
-    + 'executed on all 6,000 as a third leg: 300,000/300,000 cursors equal src/rng.ts (profile BLACKJACK-09); the live Verify button itself is not '
+    + 'executed on all 6,000 as a third leg, a second check on src/rng.ts (rebuilt from docs/ALGORITHM.md, not from Duel\'s code), not its source: 300,000/300,000 cursors equal src/rng.ts (profile BLACKJACK-09); the live Verify button itself is not '
     + 'probed (MANIFEST.md DL-6). FAIL probed: M38 '
-    + '(vendored derive.js split order changed, re-pinned), M38b (edited, not re-pinned), M38c (live chunk reads cursor+1, re-pinned), M38d–M38i '
+    + '(vendored derive.js split order changed, re-pinned), M38b (edited, not re-pinned), M38c (live chunk reads cursor+1, re-pinned), M38d–M38g, M38i '
     + '(operator leg)')] },
 };
 
@@ -219,19 +219,17 @@ export const NOT_APPLICABLE = [
 ];
 
 export const PACKAGE_CHECKS = [
-  { id: 'BLACKJACK-09', artifact: 'evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js + src/operator-verifier.ts + src/rng.ts (OPERATOR_SOURCE_CITES) + tests/blackjack/FrameworkTests.ts + tests/blackjack/BlackjackTests.ts + Step 38', coverage: 'full',
-    note: 'VENDORED OPERATOR SOURCE (since 2026-09-25): Duel\'s own Blackjack verification code, copied by Paulo from duel.com → Provably Fair → '
+  { id: 'BLACKJACK-09', artifact: 'evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js + src/operator-verifier.ts + src/rng.ts + docs/ALGORITHM.md + tests/blackjack/FrameworkTests.ts + tests/blackjack/BlackjackTests.ts + Step 38', coverage: 'full',
+    note: 'VENDORED OPERATOR CODE, A SECOND CHECK (since 2026-09-25; second check only since v1.2.0, 2026-10-20): src/rng.ts is rebuilt from the '
+      + 'written specification docs/ALGORITHM.md by an implementer who never opened Duel\'s code, and is not ported from this file. Duel\'s own Blackjack verification code, copied by Paulo from duel.com → Provably Fair → '
       + 'Verify (code panel) on 2026-09-25 and saved verbatim (SHA-256 1dabca2a…fe16b2, pinned in src/operator-verifier.ts; MANIFEST.md#evidence E17), is '
       + 'EXECUTED UNMODIFIED (function wrapper, Node WebCrypto; runner pinned) by a unit test and by Step 38 on every captured hand from its revealed '
       + 'seed: 6,000/6,000 hands, 300,000/300,000 cursors (0 … 49) equal src/rng.ts, 33,194/33,194 served cards in the declared order equal its '
       + 'cursors. FIXED VECTORS through the operator\'s own code: the known captured hand (nonce 0, all 50 cursors) and five hash vectors for the '
       + 'branches no captured round reaches — rejection at MAX_FAIR, acceptance at MAX_FAIR − 1, seven rejections, all eight rejected (both throw), '
-      + 'big-endian read. THE ADAPTER CITES THE LINES IT PORTS: src/rng.ts OPERATOR_SOURCE_CITES, 12 operator lines (message L83, hex key L40, '
-      + 'HMAC-SHA-256 L46, chunk loop L61, big-endian uint32 L67, bound L68, accept L69, index L70, throw L75, 50 cursors L97, CARDS L12/L17), '
-      + 'each checked verbatim against the pinned bytes. The commitment encoding (SHA-256 of the hex-decoded seed) is not in the operator file and '
+      + 'big-endian read. The 12-line citation table of the v1.1.0 port (OPERATOR_SOURCE_CITES) was removed with the port on 2026-10-20. The commitment encoding (SHA-256 of the hex-decoded seed) is not in the operator file and '
       + 'rests on the capture (Step 1). FAIL probed: M38d (message reads cursor+1, re-pinned), M38e (edited, not re-pinned), M38f (bound 2^32, '
-      + 're-pinned and the citation rewritten — only the hash vectors catch it), M38g (little-endian, re-pinned and cited), M38h (cite at the wrong '
-      + 'line), M38i (runner passes nonce+1, re-pinned), M38j (mocha: the unit test fails). NOT established: that the live Verify button runs the '
+      + 're-pinned — only the hash vectors catch it), M38g (little-endian, re-pinned), M38i (runner passes nonce+1, re-pinned), M38j (mocha: the unit test fails). NOT established: that the live Verify button runs the '
       + 'code its panel shows, or that Duel\'s server runs it (MANIFEST.md DL-6)' },
   { id: 'BLACKJACK-23', artifact: 'MANIFEST.md#verification-results (S5-MATRIX block)', coverage: 'full',
     note: 'MANIFEST "Verification results" carries the framework\'s standardized matrix S5-1 … S5-8 between S5-MATRIX markers, each row Not tested (the capture '
