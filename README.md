@@ -1,6 +1,6 @@
 # Duel Blackjack — Provably Fair Audit
 
-**Auditor:** [ProvablyFair.org](https://www.provablyfair.org) · **Audit ID:** PF-2026-DL09 · **Release:** `v1.2.0` · **Capture:** 30 April – 1 May 2026
+**Auditor:** [ProvablyFair.org](https://www.provablyfair.org) · **Audit ID:** PF-2026-DL09 · **Release:** `v1.2.1` · **Capture:** 30 April – 1 May 2026
 
 **Result: PROVABLY FAIR — Full Pass.** All 6,000 captured hands recompute card for card from the revealed seeds, every hand's result is derived from the recomputed cards, and `amount_won` equals that derivation exactly. The verifier reports 36 passing steps of 38, two disclosed capture-origin flags and no hard failures. Step 4 records seven nonces the capture missed on retried requests; Step 37 records that the capture declined every insurance prompt, so the 2:1 insurance payout is assumed, not verified. No hand was split a second time: Duel did not offer a split on any of the 46 split hands dealt a pair again, and the capture never requested one, so whether the server refuses a re-split is not tested. Neither flag identifies an operator defect. The unfunded insurance and the untried second split are disclosed in this release and are to be covered in the next capture.
 

@@ -1,6 +1,6 @@
 # Duel Blackjack — Consolidated Audit Overview
 
-**Audit ID:** PF-2026-DL09 · **Auditor:** ProvablyFair.org · **Release:** `v1.2.0` · **Framework:** 1.1 (Blackjack profile 1.0.2)
+**Audit ID:** PF-2026-DL09 · **Auditor:** ProvablyFair.org · **Release:** `v1.2.1` · **Framework:** 1.1 (Blackjack profile 1.0.2)
 
 Original audit: May 2026. Capture: 30 April – 1 May 2026, from `2026-04-30T21:31:22.265Z` to `2026-05-01T13:16:57.939Z`. Original publication: 4 June 2026. Audit report: https://audit.provablyfair.org/casino/duel/games/blackjack/overview. This overview consolidates the package documentation. The machine-readable release identity remains in [RELEASE-MANIFEST.json](RELEASE-MANIFEST.json).
 
@@ -480,6 +480,7 @@ The original report also listed three low-priority operator suggestions, explici
 | `v1.0.1` | Errata: the dataset's capture metadata carried a session credential (`meta.token`) recorded by the capture script. The field was removed; no bet, seed, outcome or payout field changed, so every figure and step result is identical. Dataset hash re-pinned (was `ad9cdffcea2f6cf535361e2265ae0bf95bb1290b3bbf9fee70dda053d917fe12`) | unchanged |
 | `v1.1.0` | Re-certification under Framework 1.1, October 2026, below. The dataset of record is byte-identical to v1.0.1 | unchanged |
 | `v1.2.0` | The card code rebuilt from a written specification instead of ported from Duel's code; Duel's code kept as a second check. Below, "21 October 2026" and "20 October 2026" | unchanged |
+| `v1.2.1` | Errata: adds `.gitattributes` (`* -text`) so a Windows git clone keeps every file byte-identical; no audit content changed. | unchanged |
 
 **v1.1.0.** Scored steps went from 34 in v1.0.1 to 38: Draw Bias Bound, Round Replay & Action Grammar, Rule & Coverage Register and Player-Verifier Parity are new. Step 4 is now a capture-origin FLAG reporting the same 7 missing nonces in 7 epochs v1.0.1 reported (it passed in v1.0.1); Step 37 is new and a capture-origin FLAG; neither moves the verdict. Steps 5 and 22 assert the split draw order strictly (a cursor multiset until 24 September 2026), Step 6 substitutes the client seed on all 6,000 initial deals (100 hands at cursor 0 until 24 September 2026), Step 7 settles from the cards with exact money, and Step 18 decides on Test C. Added: `LICENSE` (MIT), `.nvmrc` (Node 22), `RELEASE-MANIFEST.json` (written by `scripts/release-manifest.mjs`) and the mutation battery. The comparison with Duel's stated edge is stated, not scored ([Duel's stated edge](#duels-stated-edge)). v1.1.0's release identity and the fingerprint of the ProvablyFair.org signing key (`signature`) are in the `RELEASE-MANIFEST.json` at the `v1.1.0` tag; the [RELEASE-MANIFEST.json](RELEASE-MANIFEST.json) in this package is v1.2.0's.
 
