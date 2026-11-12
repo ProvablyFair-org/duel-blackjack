@@ -2,7 +2,7 @@
  * Steps 28–33: Game-Rule Coverage Checks
  *
  * Each step verifies a stated rule from `MANIFEST.md#game-and-algorithm` against the captured
- * 6,000-hand dataset. These were added to close gaps Mike flagged: every
+ * 6,000-hand dataset. These were added to close gaps found in QA: every
  * claimed rule should have a scored step producing an evidence count for the
  * rule-check table in the report.
  *
@@ -149,7 +149,7 @@ export function run(ctx: VerifyContext): StepResult[] {
   //   - the money-path return Σ amount_won / Σ staked, LABELLED a reconciliation of this capture's
   //     play, not an RTP (the RTP is Step 16's engine).
   // FIT_ALPHA / FIT_Z are the deviation thresholds; a fit outside them is reported as INFO (profile
-  // policy INFORMATIONAL, Mike 2026-09-29: never a FLAG, never counted, verdict unchanged), never a
+  // policy INFORMATIONAL, adopted 2026-09-29: never a FLAG, never counted, verdict unchanged), never a
   // PASS. The census half (surrender / unknown results) still FAILs. Live-sample power is low at 6,000
   // hands — the authoritative uniformity test is Step 17.
   {

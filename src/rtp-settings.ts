@@ -1,8 +1,7 @@
 /**
  * RTP-CLAIM wiring — Duel Blackjack: the per-setting exact RTP table and the claim it is held to.
  *
- * Added 14 October 2026 under Methodology v1.1, decision D4 (Mike: "D1, D4, D5, D6 (approve the cited
- * versions) and D9: go with your recommendations"; D4: an rtp-claim-table.json for Blackjack, RTP
+ * Added 14 October 2026 under Methodology v1.1, decision D4: an rtp-claim-table.json for Blackjack, RTP
  * under optimal play, "Blackjack (99.43%)" passes on its own maths, Zero Edge rakeback noted, not
  * tested).
  *

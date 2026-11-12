@@ -111,7 +111,7 @@ export function run(ctx: VerifyContext): StepResult[] {
   // where the capture never exercised it; the framework coverage floors (COVERAGE_FLOORS) compared
   // with what the capture reached; uncaptured games counted (Step 4 register). A rule the data
   // CONTRADICTS FAILs. A floor the capture did not reach is a FLAG with origin = capture — disclosed
-  // with its witness count, verdict-neutral, never silently passed (Mike's recipe: funded insurance
+  // with its witness count, verdict-neutral, never silently passed (QA recipe: funded insurance
   // is 0 at all three Blackjack captures, ASSUMED). MANIFEST.md DL register carries the rows.
   {
     let splits = 0, aceSplits = 0, das = 0, doubles = 0, doublesOutside9to11 = 0;

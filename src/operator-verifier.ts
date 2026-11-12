@@ -9,7 +9,7 @@
  * on that rebuild. Through v1.1.0 src/rng.ts was ported from it and cited 12 of its lines; that
  * citation table is gone with the port.
  *
- * PROVENANCE. Copied by Paulo from duel.com → Provably Fair → Verify (Blackjack), the code panel, on
+ * PROVENANCE. Copied by ProvablyFair.org from duel.com → Provably Fair → Verify (Blackjack), the code panel, on
  * 2026-09-25, and saved verbatim as evidence/verify-tab/duel-verify-tab-blackjack-2026-09-25.js
  * (3,612 bytes, 112 lines, file mtime 2026-09-25T13:32:05-03:00). The file is never edited. What
  * this does NOT establish: that the Verify button on the live page runs exactly the code its panel

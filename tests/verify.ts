@@ -121,7 +121,7 @@ const hardFail = results.filter(r => r.status === 'FAIL').length;
 // A capture-origin FLAG (an auditor-side capture retry that left a nonce gap) is disclosed but
 // verdict-neutral; only an operator-origin FLAG downgrades to Conditional Pass. Same rule as Duel
 // plinko (adopted 2026-09-22): not a PASS, but not against the verdict either.
-// INFO (profile policy INFORMATIONAL — the live-sample fit, Mike 2026-09-29): reported, never counted
+// INFO (profile policy INFORMATIONAL — the live-sample fit, adopted 2026-09-29): reported, never counted
 // as a flag, never enters the verdict or the exit code.
 const informational = results.filter(r => r.status === 'INFO').length;
 const captureFlags  = results.filter(r => r.status === 'FLAG' && r.origin === 'capture');
